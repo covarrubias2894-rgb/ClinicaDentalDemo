@@ -18,6 +18,16 @@
 <meta property="og:site_name" content="Clínica Dental Nácar">
 <meta property="og:title" content="Clínica Dental Nácar · Agenda tu cita en Puebla">
 <meta property="og:description" content="Tu sonrisa en buenas manos. Agenda tu cita dental por WhatsApp en 30 segundos. Atención en Puebla, Pue.">
+<!-- Imagen de la tarjeta al compartir la liga. Debe ser la dirección COMPLETA donde quedó publicada la imagen.
+     Si tu repositorio de GitHub no se llama ClinicaDentalDemo, cambia esa parte en las 2 ligas de abajo. -->
+<meta property="og:url" content="https://covarrubias2894-rgb.github.io/ClinicaDentalDemo/">
+<meta property="og:image" content="https://covarrubias2894-rgb.github.io/ClinicaDentalDemo/og-imagen.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Clínica Dental Nácar · Agenda tu cita dental en 30 segundos">
+<meta name="twitter:card" content="summary_large_image">
+<!-- SOLO DEMO: evita que Google muestre esta página. Bórrala en la versión de un cliente real. -->
+<meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0B3C5D">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230B3C5D'/%3E%3Cpath transform='translate(4 4) scale(.75)' fill='%232EC4B6' d='M10.2 3.5C6.6 3.5 4 6.2 4 10.2C4 13.4 5.2 15.6 6 18.2C6.8 20.8 7.1 23.8 7.7 26.4C8.2 28.5 9 29.5 10.1 29.5C11.6 29.5 12.1 27.8 12.6 25.4L13.2 22.6C13.5 21.3 14.6 20.6 16 20.6C17.4 20.6 18.5 21.3 18.8 22.6L19.4 25.4C19.9 27.8 20.4 29.5 21.9 29.5C23 29.5 23.8 28.5 24.3 26.4C24.9 23.8 25.2 20.8 26 18.2C26.8 15.6 28 13.4 28 10.2C28 6.2 25.4 3.5 21.8 3.5C19.6 3.5 18.2 4.6 16 4.6C13.8 4.6 12.4 3.5 10.2 3.5Z'/%3E%3C/svg%3E">
 <style>
@@ -95,6 +105,11 @@ a{color:var(--aqua-osc)}
 }
 .btn-barra{flex:none;padding:10px 18px}
 main{padding-top:var(--barra)}
+
+/* ---------- Franja de demostración (solo con CONFIG.demo) ---------- */
+.demo-franja{padding:9px 16px;background:var(--azul);color:#DCE7EF;font-size:.875rem;line-height:1.4;text-align:center}
+.demo-franja b{color:#fff}
+.demo-franja a{color:#8EE6DC;font-weight:700;white-space:nowrap}
 
 /* ---------- Portada ---------- */
 .hero{padding:28px 0 44px;background:
@@ -319,6 +334,7 @@ div.paso > .paso-titulo{margin-bottom:14px}
 </header>
 
 <main>
+  <p class="demo-franja" id="demo-franja" hidden></p>
   <section class="hero" id="inicio" aria-labelledby="hero-titulo">
     <div class="contenedor hero-in">
       <div>
@@ -442,6 +458,10 @@ div.paso > .paso-titulo{margin-bottom:14px}
 
 <script>
 const CONFIG = {
+  // SOLO DEMO: muestra la franja "Página de demostración". En la versión de un cliente real pon demo: false
+  // y borra también la etiqueta <meta name="robots"> de arriba.
+  demo: true,
+  demoWhatsapp: "522221018655",       // WhatsApp de NegoBoost para la franja de demo
   clinica: "Clínica Dental Nácar",
   slogan: "Tu sonrisa en buenas manos",
   ciudad: "Puebla, Pue.",
@@ -460,8 +480,8 @@ const CONFIG = {
   ],
   diasCerrados: [0],                  // 0 = domingo (para generar los días de la agenda)
   doctores: [
-    { nombre: "Dra. Mariana Ortega López", especialidad: "Cirujana Dentista · Odontología general y estética", cedula: "1234567" },
-    { nombre: "Dr. Andrés Medina Ruiz", especialidad: "Especialista en Ortodoncia", cedula: "2345678", cedulaEsp: "8765432" }
+    { nombre: "Dra. Mariana Ortega López", especialidad: "Cirujana Dentista · Odontología general y estética", cedula: "0000000" },
+    { nombre: "Dr. Andrés Medina Ruiz", especialidad: "Especialista en Ortodoncia", cedula: "0000000", cedulaEsp: "0000000" }
   ],
   servicios: [
     { nombre: "Consulta de valoración", desc: "Revisamos tu boca y te damos un plan claro con precios.", desde: 300, icono: "🔎" },
@@ -739,6 +759,13 @@ const CONFIG = {
       `<li><a href="${ligaWhats(msgInfo())}" target="_blank" rel="noopener">${svg('<path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"/>')}WhatsApp</a></li>` +
       redes.map(([k, nombre, ico]) => `<li><a href="${esc(C.redes[k])}" target="_blank" rel="noopener">${svg(ico)}${nombre}</a></li>`).join('');
     $('#credito').textContent = `© ${new Date().getFullYear()} ${C.clinica} · Página hecha por NegoBoost MX`;
+
+    if (C.demo) {
+      const franja = $('#demo-franja');
+      const wa = `https://wa.me/${String(C.demoWhatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent('Hola NegoBoost 👋 Vi la página de demostración del consultorio dental y me interesa una para mi consultorio.')}`;
+      franja.innerHTML = `<b>Página de demostración</b> · consultorio ficticio hecho por NegoBoost MX. <a href="documentos.html">Ver el generador de recetas →</a> · <a href="${esc(wa)}" target="_blank" rel="noopener">¿La quieres para tu consultorio?</a>`;
+      franja.hidden = false;
+    }
 
     pintarAviso();
     pintarJsonLd();
