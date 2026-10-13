@@ -1,0 +1,2243 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--
+  Generador de documentos para consultorio dental · NegoBoost MX
+  Receta, presupuesto, recibo, indicaciones, consentimiento, aviso de privacidad y justificante.
+
+  Un solo archivo, sin internet ni librerías: el PDF sale con "Imprimir → Guardar como PDF".
+  Los datos del consultorio se cambian desde la propia app (botón ⚙ Configuración); no hace falta tocar el código.
+  No guarda datos de pacientes: solo la configuración y los folios, en este navegador (clave nacar_docs_config_v1).
+  Pruebas internas (número a letra y totales): abre esta página con #/pruebas al final de la liga.
+-->
+<title>Documentos · Clínica Dental Nácar</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0B3C5D">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230B3C5D'/%3E%3Cpath transform='translate(4 4) scale(.75)' fill='%232EC4B6' d='M10.2 3.5C6.6 3.5 4 6.2 4 10.2C4 13.4 5.2 15.6 6 18.2C6.8 20.8 7.1 23.8 7.7 26.4C8.2 28.5 9 29.5 10.1 29.5C11.6 29.5 12.1 27.8 12.6 25.4L13.2 22.6C13.5 21.3 14.6 20.6 16 20.6C17.4 20.6 18.5 21.3 18.8 22.6L19.4 25.4C19.9 27.8 20.4 29.5 21.9 29.5C23 29.5 23.8 28.5 24.3 26.4C24.9 23.8 25.2 20.8 26 18.2C26.8 15.6 28 13.4 28 10.2C28 6.2 25.4 3.5 21.8 3.5C19.6 3.5 18.2 4.6 16 4.6C13.8 4.6 12.4 3.5 10.2 3.5Z'/%3E%3C/svg%3E">
+<!-- El tamaño de hoja cambia según el documento (carta o media carta) -->
+<style id="estilo-pagina">@page{size:letter;margin:12mm}</style>
+<style>
+:root{
+  --azul:#0B3C5D;        /* titulares, encabezado, botón principal */
+  --aqua:#2EC4B6;        /* acentos */
+  --aqua-suave:#E6F8F6;  /* fondos suaves */
+  --coral:#FF6B6B;       /* avisos y acciones delicadas */
+  --whats:#25D366;       /* botón de WhatsApp */
+  --texto:#1F2A37;
+  --gris:#F4F7F9;
+  --blanco:#FFFFFF;
+  /* Derivados para que el texto pase contraste AA */
+  --texto-suave:#52606D;
+  --aqua-osc:#0E7C72;
+  --coral-osc:#B42318;
+  --whats-tinta:#053B22;
+  --borde:#E2EAF0;
+  --borde-campo:#D3DFE7;
+  --amarillo:#FFF4CC;
+  --amarillo-borde:#F0C53D;
+  --amarillo-tinta:#5C4300;
+  --radio:16px;
+  --sombra:0 1px 2px rgba(11,60,93,.05),0 6px 20px rgba(11,60,93,.07);
+  --fuente:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;font-family:var(--fuente);font-size:1rem;line-height:1.5;color:var(--texto);background:var(--gris);-webkit-font-smoothing:antialiased}
+body.con-acciones{padding-bottom:178px}
+@media (min-width:760px){body.con-acciones{padding-bottom:104px}}
+main{flex:1}
+img,svg{display:block;max-width:100%}
+h1,h2,h3{color:var(--azul);line-height:1.2;margin:0;font-weight:800;letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--aqua-osc)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+[tabindex="-1"]:focus{outline:none}
+.sr-only{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.envoltura{width:100%;max-width:980px;margin:0 auto;padding:0 16px}
+.angosta{max-width:700px}
+@media (min-width:768px){.envoltura{padding:0 24px}}
+
+/* ---------- Botones ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 18px;border:2px solid transparent;border-radius:14px;background:none;font-weight:700;font-size:1rem;line-height:1.2;text-align:center;text-decoration:none;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background-color .15s,border-color .15s,transform .15s}
+.btn:active{transform:translateY(1px)}
+.btn-azul{background:var(--azul);color:#fff}
+.btn-azul:hover{background:#0F4C75}
+.btn-whats{background:var(--whats);color:var(--whats-tinta)}
+.btn-whats:hover{background:#1FCB5E}
+.btn-linea{background:#fff;color:var(--azul);border-color:#C9D6E0}
+.btn-linea:hover{border-color:var(--azul)}
+.btn-suave{background:var(--aqua-suave);color:var(--azul)}
+.btn-suave:hover{background:#CDF1EC}
+.btn-peligro{background:#fff;color:var(--coral-osc);border-color:var(--coral)}
+.btn-peligro:hover{background:#FFF1F0}
+.btn-bloque{display:flex;width:100%}
+.btn-grande{min-height:56px;font-size:1.0625rem}
+.btn-chico{padding:8px 14px;font-size:.9375rem}
+.btn:disabled,.btn[aria-disabled="true"]{background:#D7E0E7;color:#4E5D6C;border-color:transparent;cursor:not-allowed;transform:none}
+
+/* ---------- Encabezado de la app ---------- */
+.cab{background:var(--azul);color:#fff;padding-top:env(safe-area-inset-top)}
+.cab-in{display:flex;align-items:center;gap:12px;min-height:64px}
+.cab-marca{display:flex;align-items:center;gap:10px;min-width:0;margin-right:auto;color:#fff;text-decoration:none}
+.cab-marca svg{flex:none;width:34px;height:34px}
+.cab-marca img{flex:none;height:40px;width:auto;max-width:88px;object-fit:contain;padding:3px;border-radius:10px;background:#fff}
+.cab-txt{min-width:0;line-height:1.15}
+.cab-txt b{display:-webkit-box;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:1rem;font-weight:800}
+.cab-txt small{display:block;margin-top:2px;font-size:.78rem;font-weight:600;color:#BFE9E4}
+.btn-cab{flex:none;padding:8px 14px;border-color:rgba(255,255,255,.35);color:#fff;font-size:.9375rem}
+.btn-cab:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+.btn-cab[aria-current="page"]{background:#fff;color:var(--azul);border-color:#fff}
+
+/* ---------- Avisos ---------- */
+.banner{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-top:16px;padding:14px 16px;border:1px solid var(--amarillo-borde);border-radius:var(--radio);background:var(--amarillo);color:var(--amarillo-tinta)}
+.banner p{flex:1 1 220px}
+.banner .detalle{display:block;margin-top:2px;font-size:.9375rem}
+.banner-error{border-color:#F5B5B0;background:#FFF1F0;color:var(--coral-osc);font-weight:600}
+.curso{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:16px;padding:14px 16px;border:1px solid #BFE9E4;border-radius:var(--radio);background:var(--aqua-suave)}
+.curso p{flex:1 1 220px;color:var(--azul)}
+.alerta{margin-bottom:18px;padding:14px 16px;border:2px solid var(--coral);border-radius:14px;background:#FFF5F5;color:var(--coral-osc)}
+.alerta p{margin-bottom:10px}
+.falta{margin:0 0 12px;padding:8px 12px;border-radius:10px;background:#FFF5F5;color:var(--coral-osc);font-size:.9rem;font-weight:600}
+.nota-gris{padding:12px 14px;border-radius:12px;background:var(--gris);color:var(--texto-suave);font-size:.9rem}
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));z-index:80;width:max-content;max-width:calc(100vw - 32px);padding:12px 18px;border-radius:14px;background:var(--texto);color:#fff;font-weight:700;box-shadow:0 10px 30px rgba(11,60,93,.3);transform:translateX(-50%)}
+.toast.error{background:var(--coral-osc)}
+
+/* ---------- Pantallas ---------- */
+.pantalla{padding:20px 0 32px}
+.pantalla-cab{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.titulo{font-size:clamp(1.5rem,1.2rem + 1.4vw,2rem)}
+.titulo span{margin-right:4px}
+.lead{margin:6px 0 18px;color:var(--texto-suave)}
+.tarjeta{background:#fff;border:1px solid var(--borde);border-radius:var(--radio);box-shadow:var(--sombra)}
+
+/* Inicio */
+.mosaicos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (min-width:720px){.mosaicos{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}}
+@media (min-width:940px){.mosaicos{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.mosaico{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-height:148px;padding:16px 14px;border:1px solid var(--borde);border-radius:var(--radio);background:#fff;box-shadow:var(--sombra);color:var(--texto);text-decoration:none;-webkit-tap-highlight-color:transparent;transition:border-color .15s,transform .15s}
+.mosaico:hover{border-color:var(--aqua)}
+.mosaico:active{transform:translateY(1px)}
+.mosaico-ico{width:48px;height:48px;border-radius:14px;background:var(--aqua-suave);display:grid;place-items:center;font-size:1.5rem;line-height:1}
+.mosaico b{color:var(--azul);font-size:1.0625rem;font-weight:800;line-height:1.2}
+.mosaico small{color:var(--texto-suave);font-size:.875rem;line-height:1.35}
+
+/* Formularios */
+.form-card{padding:20px 16px 4px}
+@media (min-width:600px){.form-card{padding:24px 24px 8px}}
+.campo{min-width:0;margin:0 0 18px;padding:0;border:0}
+.campo > label,.etiqueta{display:block;margin-bottom:6px;padding:0;font-weight:700;color:var(--azul)}
+.opc{font-weight:500;color:var(--texto-suave)}
+.control{display:block;width:100%;min-width:0;min-height:52px;padding:12px 14px;border:2px solid var(--borde-campo);border-radius:14px;background:#fff;color:var(--texto);font-size:1rem;line-height:1.35}
+textarea.control{min-height:96px;resize:vertical;line-height:1.45}
+select.control{-webkit-appearance:none;appearance:none;padding-right:42px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230B3C5D' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center}
+input[type="date"].control,input[type="time"].control{-webkit-appearance:none;appearance:none}
+.control::-webkit-date-and-time-value{text-align:left}
+.control:focus{border-color:var(--aqua);outline:3px solid rgba(46,196,182,.35);outline-offset:0}
+.control[aria-invalid="true"]{border-color:var(--coral-osc);background:#FFF8F8}
+.control:disabled{background:var(--gris);color:var(--texto-suave)}
+.control::placeholder{color:#8593A1}
+.ayuda{margin-top:6px;font-size:.875rem;color:var(--texto-suave)}
+.fila{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;align-items:end}
+.fila-ancha{display:grid;gap:0 12px}
+@media (min-width:520px){.fila-ancha{grid-template-columns:repeat(2,minmax(0,1fr));align-items:end}}
+.sub{margin:8px 0 12px;font-size:1.1875rem}
+.sub3{margin:20px 0 10px;font-size:1.0625rem}
+.grupo{margin:0 0 18px;padding:14px 14px 0;border:2px dashed var(--borde-campo);border-radius:14px}
+.grupo legend{padding:0 6px;font-weight:800;color:var(--azul)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;padding:4px;border:1px solid var(--borde);border-radius:14px;background:var(--gris)}
+.seg label{position:relative;display:block;cursor:pointer}
+.seg input{position:absolute;width:1px;height:1px;margin:0;opacity:0;pointer-events:none}
+.seg span{display:flex;align-items:center;justify-content:center;gap:6px;height:100%;min-height:48px;padding:8px 6px;border-radius:10px;color:var(--azul);font-weight:700;line-height:1.15;text-align:center;-webkit-tap-highlight-color:transparent}
+.seg input:checked + span{background:var(--azul);color:#fff;box-shadow:0 2px 6px rgba(11,60,93,.25)}
+.seg input:focus-visible + span{outline:3px solid var(--aqua);outline-offset:1px}
+.seg-3 span{flex-direction:column;gap:2px;font-size:.9375rem}
+.buscador-fila{display:flex;gap:8px}
+.buscador-fila .control{flex:1}
+.buscador-fila .btn{flex:none}
+.lista-items{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-bottom:16px}
+.vacio{padding:14px;border:2px dashed var(--borde-campo);border-radius:14px;color:var(--texto-suave);text-align:center}
+.item{min-width:0;padding:12px;border:2px solid var(--borde);border-radius:14px;background:#fff}
+.item .campo{margin-bottom:10px}
+.item .campo > label{font-size:.9375rem}
+.item-cab{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.item-num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--azul);color:#fff;display:grid;place-items:center;font-size:.875rem;font-weight:800}
+.item-tit{flex:1;min-width:0;overflow:hidden;color:var(--azul);font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.item-btns{display:flex;gap:6px;margin-left:auto}
+.mini{flex:none;width:48px;height:48px;border:2px solid var(--borde-campo);border-radius:12px;background:#fff;color:var(--azul);font-size:1.125rem;font-weight:800;line-height:1;cursor:pointer}
+.mini:hover{border-color:var(--azul)}
+.mini:disabled{opacity:.35;cursor:default}
+.mini-x{color:var(--coral-osc)}
+.mini-x:hover{border-color:var(--coral)}
+.fila-ren{display:grid;grid-template-columns:minmax(0,1fr) 68px minmax(0,1fr);gap:0 8px;align-items:end}
+.importe{margin:0 0 4px;text-align:right;color:var(--texto-suave)}
+.importe b{color:var(--azul);font-size:1.0625rem}
+.letra{margin:-10px 0 18px;padding:8px 12px;border-radius:10px;background:var(--aqua-suave);color:var(--azul);font-size:.9375rem;font-weight:600}
+.vivo{margin:0 0 18px;padding:14px 16px;border-radius:14px;background:var(--aqua-suave)}
+.totales{margin:0}
+.totales > div{display:flex;justify-content:space-between;gap:12px;padding:4px 0}
+.totales dt{color:var(--texto-suave)}
+.totales dd{margin:0;font-weight:700;color:var(--azul);font-variant-numeric:tabular-nums;text-align:right}
+.totales .total{margin:4px 0;padding:8px 0;border-top:2px solid #BFE9E4;border-bottom:2px solid #BFE9E4}
+.totales .total dt,.totales .total dd{color:var(--azul);font-size:1.1875rem;font-weight:800}
+.errores{margin:16px 0 0;padding:14px 16px;border:2px solid var(--coral);border-radius:14px;background:#FFF5F5;color:var(--coral-osc)}
+.errores ul{margin:6px 0 0;padding-left:20px}
+.btn-ver{margin-top:16px}
+
+/* Vista previa */
+.vista-herr{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.chip-papel{display:inline-flex;align-items:center;min-height:36px;padding:6px 12px;border:1px solid var(--borde);border-radius:999px;background:#fff;color:var(--azul);font-size:.875rem;font-weight:700}
+.registro{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px;padding:14px 16px;border:1px solid #BFE9E4;border-radius:var(--radio);background:var(--aqua-suave)}
+.registro p{flex:1 1 200px;color:var(--azul);font-weight:600}
+.vista-marco{position:relative;overflow:hidden;padding:12px;border-radius:var(--radio);background:#D5DEE6}
+.vista-marco.zoom{overflow-x:auto}
+.vista-escala{transform-origin:0 0}
+
+/* Barra de acciones */
+.acciones{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 0 calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--borde);background:rgba(255,255,255,.98);box-shadow:0 -8px 24px rgba(11,60,93,.1)}
+.acciones-in{display:grid;gap:8px}
+.acc-principal{display:flex;gap:8px}
+.acc-imprimir{flex:1}
+.acc-ayuda{flex:none;width:48px;padding:0;font-size:1.125rem;font-weight:800}
+.acc-sec{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px}
+.acc-btn{flex-direction:column;gap:3px;min-height:56px;padding:6px 4px;font-size:.8125rem;line-height:1.15}
+.acc-btn > span[aria-hidden]{font-size:1.25rem;line-height:1}
+.solo-ancho{display:none}
+.ayuda-pdf{max-height:46vh;overflow:auto;padding:14px 16px;border:1px solid #BFE9E4;border-radius:14px;background:var(--aqua-suave);font-size:.9375rem}
+.ayuda-pdf-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--azul)}
+.ayuda-pdf ul{margin:8px 0 0;padding-left:18px}
+.ayuda-pdf li + li{margin-top:6px}
+.ayuda-pdf .ayuda{margin-top:10px}
+.btn-x{flex:none;width:44px;height:44px;border:0;border-radius:12px;background:#fff;color:var(--azul);font-size:1.5rem;line-height:1;cursor:pointer}
+@media (min-width:760px){
+  .acciones-in{display:flex;flex-wrap:wrap;align-items:center}
+  .ayuda-pdf{flex:1 1 100%}
+  .acc-principal,.acc-sec{flex:1 1 auto}
+  .acc-imprimir{white-space:nowrap}
+  .acc-btn{flex-direction:row;gap:6px;min-height:48px;padding:8px 14px;font-size:.9375rem;white-space:nowrap}
+  .acc-btn > span[aria-hidden]{font-size:1.05rem}
+  .acc-ayuda{width:auto;padding:0 14px;font-size:.9375rem;white-space:nowrap}
+  .solo-ancho{display:inline}
+  .solo-corto{display:none}
+}
+
+/* Configuración */
+.estado-guardado{font-size:.875rem;font-weight:700;color:var(--aqua-osc)}
+.estado-guardado.error{color:var(--coral-osc)}
+.sec{margin-bottom:12px;border:1px solid var(--borde);border-radius:var(--radio);background:#fff;box-shadow:var(--sombra)}
+.sec > summary,.subsec > summary{display:flex;align-items:center;gap:12px;min-height:60px;padding:14px 16px;border-radius:var(--radio);color:var(--azul);font-size:1.0625rem;font-weight:800;list-style:none;cursor:pointer}
+.sec > summary::-webkit-details-marker,.subsec > summary::-webkit-details-marker{display:none}
+.sec > summary::after,.subsec > summary::after{content:"+";flex:none;width:30px;height:30px;margin-left:auto;border-radius:50%;background:var(--aqua-suave);color:var(--aqua-osc);display:grid;place-items:center;font-size:1.25rem;line-height:1}
+.sec[open] > summary::after,.subsec[open] > summary::after{content:"−"}
+.sec-cuerpo{padding:2px 16px 18px}
+.subsec{margin-bottom:10px;border:2px solid var(--borde);border-radius:14px}
+.subsec > summary{min-height:52px;padding:10px 14px;font-size:1rem}
+.subsec-cuerpo{padding:2px 14px 14px}
+.tabla-edit{display:grid;gap:8px;margin-bottom:12px}
+.te-cab,.te-fila{display:grid;grid-template-columns:minmax(0,1fr) 104px 48px;gap:8px;align-items:center}
+.te-cab{font-size:.8125rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--texto-suave)}
+.check{display:flex;align-items:center;gap:10px;min-height:48px;cursor:pointer;font-weight:700;color:var(--azul)}
+.check input{flex:none;width:22px;height:22px;accent-color:var(--azul)}
+.check small{font-weight:500;color:var(--texto-suave)}
+.color-fila{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.color-fila input[type="color"]{width:64px;height:48px;padding:3px;border:2px solid var(--borde-campo);border-radius:12px;background:#fff;cursor:pointer}
+.color-fila span{font-weight:700;font-variant-numeric:tabular-nums}
+.logo-fila{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.logo-prev{width:120px;height:72px;display:grid;place-items:center;border:2px dashed var(--borde-campo);border-radius:12px;background:#fff;color:var(--texto-suave);font-size:.875rem}
+.logo-prev img{max-width:108px;max-height:60px;object-fit:contain}
+.logo-btns{display:flex;flex-wrap:wrap;gap:8px}
+.btns-fila{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.peligro{margin-top:24px;padding:18px 16px;border:2px solid #FBD0CC;border-radius:var(--radio);background:#fff}
+.peligro h2{margin-bottom:6px;font-size:1.0625rem;color:var(--coral-osc)}
+.peligro p{margin-bottom:12px;color:var(--texto-suave)}
+
+/* Pruebas */
+.pruebas{width:100%;border-collapse:collapse;margin-bottom:24px;background:#fff;font-size:.9rem}
+.pruebas th,.pruebas td{padding:8px;border:1px solid var(--borde);text-align:left;vertical-align:top;overflow-wrap:anywhere}
+
+/* Pie */
+.pie{padding:18px 0 22px;color:var(--texto-suave);font-size:.9375rem;text-align:center}
+
+/* ---------- Documento (hoja) ---------- */
+.hoja{--c:#0B3C5D;--c-tinte:#E7EEF3;position:relative;width:8.5in;min-height:11in;padding:12mm;background:#fff;color:#111;font-family:var(--fuente);font-size:10pt;line-height:1.4;overflow-wrap:break-word;box-shadow:0 2px 14px rgba(11,60,93,.22)}
+.hoja.media{width:5.5in;min-height:8.5in;font-size:9pt;line-height:1.33}
+.hoja.compacto{font-size:9.5pt;line-height:1.36}
+.hoja-in{display:flex;flex-direction:column;min-height:calc(11in - 24mm - .6in)}
+.hoja.media .hoja-in{min-height:calc(8.5in - 24mm - .6in)}
+.hoja p{margin:0}
+.hoja b{color:#000}
+.hoja h2,.hoja h3{margin:0;line-height:1.2;letter-spacing:0}
+.hoja h3{font-size:10.5pt;font-weight:800;color:var(--c)}
+.hoja.media h3{font-size:9.5pt}
+.hoja ul,.hoja ol{margin:0}
+
+.d-cab{display:flex;align-items:center;gap:10pt;padding-bottom:7pt;border-bottom:2.5pt solid var(--c)}
+.d-logo{flex:none;color:var(--c)}
+.d-logo img{display:block;width:auto;height:auto;max-width:1.7in;max-height:58pt;object-fit:contain}
+.d-logo svg{display:block;width:38pt;height:38pt}
+.media .d-logo img{max-width:1.2in;max-height:42pt}
+.media .d-logo svg{width:28pt;height:28pt}
+.d-clinica{flex:1;min-width:0}
+.d-nombre{color:var(--c);font-size:17pt;font-weight:800;line-height:1.1;letter-spacing:-.01em}
+.media .d-nombre{font-size:12.5pt}
+.d-slogan{margin-top:2pt!important;color:#444;font-size:9pt;font-style:italic}
+.media .d-slogan{font-size:7.5pt}
+.d-folio{flex:none;padding:4pt 9pt;border:1.5pt solid var(--c);border-radius:5pt;text-align:center;line-height:1.15}
+.d-folio small{display:block;color:#444;font-size:6.5pt;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.d-folio b{font-size:12pt;font-variant-numeric:tabular-nums;white-space:nowrap}
+.media .d-folio{padding:3pt 7pt}
+.media .d-folio b{font-size:10pt}
+.d-datos{display:flex;justify-content:space-between;gap:4pt 14pt;padding:6pt 0;border-bottom:.75pt solid #9AA5B1;color:#222;font-size:8.5pt;line-height:1.35}
+.media .d-datos{gap:3pt 10pt;padding:5pt 0;font-size:7pt}
+.d-datos > div > span{display:block}
+.d-datos .nw{white-space:nowrap}
+.d-medico{flex:1 1 auto;min-width:0}
+.d-medico b{font-size:10pt}
+.media .d-medico b{font-size:8.5pt}
+.d-contacto{flex:0 1 auto;min-width:0;max-width:52%;text-align:right}
+.d-tit{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2pt 12pt;margin:10pt 0 8pt}
+.d-tit h2{color:var(--c);font-size:13pt;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.d-tit.largo h2{font-size:14pt;letter-spacing:-.005em;text-transform:none}
+.media .d-tit{margin:8pt 0 6pt}
+.media .d-tit h2{font-size:11pt}
+.d-fecha{color:#222;font-size:9pt;white-space:nowrap}
+.media .d-fecha{font-size:8pt}
+
+.d-pac{display:flex;flex-wrap:wrap;gap:5pt 18pt;margin-bottom:9pt;padding:6pt 9pt;border:.75pt solid #9AA5B1;border-radius:4pt}
+.d-dato{min-width:0}
+.d-dato.ancho{flex:1 1 55%}
+.d-dato small{display:block;color:#555;font-size:6.5pt;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.d-dato span{color:#000;font-size:1.05em;font-weight:700}
+.d-blanco{display:block;height:14pt;border-bottom:.75pt solid #000}
+.d-alergia{margin:0 0 9pt!important;padding:5pt 9pt;border:2pt solid #000;border-radius:4pt;background:#EDEDED;color:#000;font-weight:800}
+.media .d-cab{padding-bottom:5pt}
+.media .d-pac{margin-bottom:7pt;padding:4pt 8pt}
+.media .d-alergia{margin-bottom:7pt!important;padding:3pt 8pt}
+
+.d-rx{display:flex;gap:8pt;margin-top:2pt}
+.d-rx-sim{flex:none;color:var(--c);font-family:Georgia,"Times New Roman",serif;font-size:24pt;font-weight:700;line-height:1}
+.media .d-rx-sim{font-size:18pt}
+.d-meds{flex:1;min-width:0;padding-left:14pt}
+.d-meds li{margin-bottom:8pt;padding-left:2pt;break-inside:avoid}
+.media .d-meds li{margin-bottom:5pt}
+.d-meds li::marker{font-weight:800}
+.d-meds b{display:block;font-size:1.08em}
+.d-meds span{display:block;margin-top:1pt}
+.d-bloque{margin-top:8pt;break-inside:avoid}
+.d-bloque h3{margin-bottom:2pt}
+.d-bloque p + p{margin-top:4pt}
+
+.d-empuja{flex:1 1 auto;min-height:12pt}
+.d-firmas{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-around;gap:34pt 24pt;margin-top:34pt;break-inside:avoid}
+.d-firma{flex:1 1 0;min-width:1.75in;max-width:3.1in;text-align:center;font-size:8.5pt;line-height:1.3}
+.media .d-firmas{margin-top:26pt}
+.media .d-firma{min-width:1.6in;font-size:8pt}
+.d-firmas.tres .d-firma{min-width:2in}
+.d-acepto{margin-top:14pt!important;color:#000;font-size:10.5pt;font-weight:800;break-after:avoid}
+.d-acepto + .d-firmas{margin-top:30pt}
+.d-sobre{min-height:12pt;color:#000;font-size:9.5pt;font-weight:600}
+.d-linea{margin-top:2pt;padding-top:3pt;border-top:1pt solid #000}
+.d-linea b{display:block;font-size:9pt}
+.d-linea span{display:block;color:#222}
+
+.d-tabla{width:100%;margin-top:2pt;border-collapse:collapse;font-size:9.5pt}
+.d-tabla th{padding:5pt 6pt;border-bottom:1.5pt solid var(--c);background:var(--c-tinte);color:#000;font-size:7.5pt;font-weight:800;letter-spacing:.06em;text-align:left;text-transform:uppercase}
+.d-tabla td{padding:5pt 6pt;border-bottom:.75pt solid #B8C2CC;vertical-align:top}
+.d-tabla tr{break-inside:avoid}
+.hoja .num{text-align:right!important;white-space:nowrap;font-variant-numeric:tabular-nums}
+.c-num{width:18pt;color:#444}
+.d-resumen{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12pt 18pt;margin-top:10pt;break-inside:avoid}
+.d-info{flex:1 1 2.8in;min-width:0;font-size:9pt}
+.d-info > * + *{margin-top:5pt!important}
+.d-totales{flex:none;width:3.1in;border-collapse:collapse;font-size:9.5pt;break-inside:avoid}
+.d-totales td{padding:3pt 6pt}
+.d-totales .d-total td{padding-top:5pt;border-top:1.5pt solid #000;color:#000;font-size:12pt;font-weight:800}
+.d-totales .d-anticipo td{border-top:.75pt dashed #777;font-weight:700}
+
+.d-bueno{align-self:flex-end;margin:0 0 10pt!important;padding:4pt 12pt;border:1.5pt solid #000;border-radius:4pt;text-align:right}
+.d-bueno small{display:block;color:#444;font-size:6.5pt;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.d-bueno b{font-size:14pt;font-variant-numeric:tabular-nums}
+.d-recibi{font-size:1.12em;line-height:1.55}
+.d-dl{display:grid;gap:5pt;margin:10pt 0 0}
+.d-dl div{display:flex;gap:8pt;padding-bottom:4pt;border-bottom:.75pt solid #B8C2CC}
+.d-dl dt{flex:none;width:1.1in;padding-top:1.5pt;color:#555;font-size:6.5pt;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.d-dl dd{margin:0;color:#000;font-weight:700}
+.d-saldo{width:100%;margin-top:10pt}
+.d-leyenda{margin-top:10pt!important;color:#333;font-size:8pt;font-style:italic;text-align:center}
+
+.d-vinetas{padding-left:15pt}
+.d-vinetas li{margin-bottom:5pt;break-inside:avoid}
+.d-vinetas li::marker{color:var(--c)}
+.d-caja{margin-top:12pt;padding:8pt 11pt;border:1.5pt solid #000;border-left:6pt solid var(--c);border-radius:4pt;break-inside:avoid}
+.d-caja h3{margin-bottom:4pt;color:#000;font-size:11pt}
+.media .d-caja h3{font-size:10pt}
+.d-caja ul{padding-left:15pt}
+.d-caja li{margin-bottom:2pt}
+.d-tel{margin-top:6pt!important;color:#000;font-weight:800}
+
+.d-lugar{margin-bottom:8pt!important;text-align:right}
+.d-intro{margin-bottom:8pt!important;text-align:justify}
+.d-secciones{padding-left:15pt}
+.d-secciones > li{margin-bottom:6pt;break-inside:avoid}
+.d-secciones > li::marker{color:var(--c);font-weight:800}
+.d-secciones h3{margin-bottom:1pt;font-size:1em}
+.d-secciones p{text-align:justify}
+.d-secciones p + p{margin-top:3pt}
+.d-nota{margin-top:10pt!important;color:#555;font-size:7pt;text-align:center}
+
+.d-aviso{font-size:.95em}
+.d-aviso h3{margin:7pt 0 2pt;font-size:1.05em}
+.d-aviso h3:first-child{margin-top:0}
+.d-aviso p{margin-top:3pt}
+.d-aviso ul{margin:2pt 0;padding-left:14pt}
+.d-aviso li{margin-bottom:1pt}
+.d-consent{margin-top:10pt;padding:8pt 10pt;border:1.5pt solid #000;border-radius:4pt;break-inside:avoid}
+.d-check{display:flex;align-items:flex-start;gap:8pt;margin-top:6pt!important}
+.d-check i{flex:none;width:11pt;height:11pt;margin-top:1pt;border:1.2pt solid #000;border-radius:2pt}
+.d-consent .d-firmas{margin-top:30pt}
+
+.d-texto{font-size:1.12em;line-height:1.6;text-align:justify}
+.d-texto + .d-texto{margin-top:8pt!important}
+.d-texto-lugar{margin-top:14pt!important;text-align:right}
+
+/* ---------- Impresión: solo el documento ---------- */
+@media print{
+  html,body{background:#fff!important}
+  body{display:block;min-height:0;padding:0!important}
+  .app-ui,.toast{display:none!important}
+  main,.pantalla,#p-vista .envoltura{margin:0!important;padding:0!important;max-width:none!important}
+  .vista-marco{height:auto!important;padding:0!important;overflow:visible!important;border-radius:0;background:none!important}
+  .vista-escala{width:auto!important;margin:0!important;transform:none!important}
+  .hoja{width:auto!important;max-width:calc(8.5in - 24mm);min-height:0!important;margin:0!important;padding:0!important;box-shadow:none!important}
+  .hoja.media{max-width:calc(5.5in - 24mm)}
+  .hoja,.hoja *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<header class="cab app-ui">
+  <div class="envoltura cab-in">
+    <a class="cab-marca" id="cab-marca" href="#/" aria-label="Ir al inicio"></a>
+    <a class="btn btn-cab" id="btn-config" href="#/config"><span aria-hidden="true">⚙</span> Configuración</a>
+  </div>
+</header>
+
+<div class="envoltura app-ui" id="aviso-almacen" hidden>
+  <p class="banner banner-error" role="alert"><span aria-hidden="true">⚠</span> Tu navegador no deja guardar la configuración; se perderá al cerrar.</p>
+</div>
+
+<main id="principal">
+  <section class="pantalla app-ui" id="p-inicio" hidden>
+    <div class="envoltura">
+      <div id="banner-config" hidden></div>
+      <div id="paciente-curso" hidden></div>
+      <h1 class="titulo" tabindex="-1" style="margin-top:20px">¿Qué documento necesitas?</h1>
+      <p class="lead">Llena los datos, revisa cómo queda y luego imprímelo, guárdalo en PDF o mándalo por WhatsApp.</p>
+      <nav class="mosaicos" id="mosaicos" aria-label="Documentos"></nav>
+    </div>
+  </section>
+
+  <section class="pantalla app-ui" id="p-form" hidden>
+    <div class="envoltura angosta">
+      <div class="pantalla-cab"><a class="btn btn-linea btn-chico" href="#/" data-accion="inicio"><span aria-hidden="true">←</span> Inicio</a></div>
+      <h1 class="titulo" id="form-titulo" tabindex="-1"></h1>
+      <p class="lead" id="form-desc"></p>
+      <div class="tarjeta form-card" id="form"></div>
+      <div class="errores" id="form-errores" role="alert" hidden></div>
+      <button type="button" class="btn btn-azul btn-grande btn-bloque btn-ver" data-accion="ver">Ver documento <span aria-hidden="true">→</span></button>
+    </div>
+  </section>
+
+  <section class="pantalla" id="p-vista" hidden>
+    <div class="envoltura app-ui">
+      <h1 class="titulo" id="vista-titulo" tabindex="-1"></h1>
+      <p class="lead">Así se va a ver impreso. Revísalo antes de imprimir o mandar.</p>
+      <div class="alerta" id="aviso-hojas" role="status" hidden></div>
+      <div class="registro" id="registro-cobro" hidden>
+        <p>¿Ya lo anotaste en el control de cobros?</p>
+        <a class="btn btn-suave" id="btn-registro" href="#" target="_blank" rel="noopener"><span aria-hidden="true">📝</span> Registrar este cobro en el control</a>
+      </div>
+      <div class="vista-herr">
+        <span class="chip-papel" id="vista-papel"></span>
+        <button type="button" class="btn btn-linea btn-chico" id="btn-zoom" data-accion="zoom"></button>
+      </div>
+    </div>
+    <div class="envoltura">
+      <div class="vista-marco" id="vista-marco"><div class="vista-escala" id="vista-escala"><article class="hoja" id="hoja" aria-label="Vista previa del documento"></article></div></div>
+    </div>
+  </section>
+
+  <section class="pantalla app-ui" id="p-config" hidden>
+    <div class="envoltura angosta">
+      <div class="pantalla-cab">
+        <button type="button" class="btn btn-linea btn-chico" data-accion="cerrar-config"><span aria-hidden="true">←</span> Listo</button>
+        <span class="estado-guardado" id="estado-guardado" aria-live="polite"></span>
+      </div>
+      <h1 class="titulo" tabindex="-1"><span aria-hidden="true">⚙</span> Configuración</h1>
+      <p class="lead">Los cambios se guardan automáticamente en este dispositivo. Aquí no se guarda ningún dato de pacientes.</p>
+      <div id="config-cuerpo"></div>
+    </div>
+  </section>
+
+  <section class="pantalla app-ui" id="p-pruebas" hidden>
+    <div class="envoltura">
+      <div class="pantalla-cab"><a class="btn btn-linea btn-chico" href="#/" data-accion="inicio"><span aria-hidden="true">←</span> Inicio</a></div>
+      <h1 class="titulo" tabindex="-1">Pruebas internas</h1>
+      <div id="pruebas-cuerpo"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="pie app-ui"><div class="envoltura"><p><span aria-hidden="true">🔒</span> Este generador no guarda datos de tus pacientes.</p></div></footer>
+
+<div class="acciones app-ui" id="acciones" hidden>
+  <div class="envoltura acciones-in">
+    <div class="ayuda-pdf" id="ayuda-pdf" hidden>
+      <div class="ayuda-pdf-cab"><b>¿Cómo guardo el PDF?</b><button type="button" class="btn-x" data-accion="ayuda-pdf" aria-label="Cerrar ayuda">×</button></div>
+      <ul>
+        <li><b>Android (Chrome):</b> toca Imprimir → arriba elige “Guardar como PDF” → toca el botón PDF.</li>
+        <li><b>iPhone:</b> toca Imprimir → pellizca la vista previa hacia afuera (o toca el botón Compartir) → “Guardar en Archivos” o mándalo por WhatsApp.</li>
+        <li><b>Computadora:</b> Imprimir → en Destino elige “Guardar como PDF”. En “Más ajustes” puedes quitar los encabezados y pies de página del navegador.</li>
+      </ul>
+      <p class="ayuda">¿Abriste esta página desde WhatsApp o Facebook? Ábrela en Chrome o Safari para poder imprimir.</p>
+    </div>
+    <div class="acc-principal">
+      <button type="button" class="btn btn-azul acc-imprimir" data-accion="imprimir"><span aria-hidden="true">🖨️</span> Imprimir / Guardar PDF</button>
+      <button type="button" class="btn btn-linea acc-ayuda" data-accion="ayuda-pdf" aria-expanded="false" aria-controls="ayuda-pdf" title="¿Cómo guardo el PDF?"><span class="solo-corto" aria-hidden="true">?</span><span class="solo-ancho">¿Cómo guardo el PDF?</span><span class="sr-only solo-corto">¿Cómo guardo el PDF?</span></button>
+    </div>
+    <div class="acc-sec">
+      <a class="btn btn-whats acc-btn" id="acc-whats" href="#" target="_blank" rel="noopener"><span aria-hidden="true">💬</span> <span><span class="solo-ancho">Mandar por </span>WhatsApp</span></a>
+      <button type="button" class="btn btn-linea acc-btn" id="acc-copiar" data-accion="copiar"><span aria-hidden="true">📋</span> Copiar texto</button>
+      <button type="button" class="btn btn-linea acc-btn" data-accion="editar"><span aria-hidden="true">✏️</span> Editar</button>
+      <button type="button" class="btn btn-linea acc-btn" data-accion="nuevo"><span aria-hidden="true">🆕</span> Nuevo</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<noscript><p style="padding:16px;text-align:center">Para usar el generador de documentos activa JavaScript.</p></noscript>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ======================= Datos de ejemplo (ficticios) ======================= */
+  const EXTRACCION = [
+    'Muerde la gasa con firmeza durante 30 a 40 minutos. Si al quitarla sigue sangrando, pon una gasa limpia y muerde otros 30 minutos.',
+    'Durante las primeras 24 horas no escupas, no te enjuagues con fuerza y no uses popote: el coágulo que se forma es lo que cierra la herida.',
+    'No fumes ni tomes bebidas alcohólicas durante 72 horas (3 días).',
+    'Las primeras 24 horas ponte frío por fuera de la cara, del lado de la extracción: 15 minutos sí y 15 minutos no. Envuelve el hielo en un trapo; nunca directo sobre la piel.',
+    'Come alimentos blandos y tibios (no calientes), como sopa, puré, yogur o huevo, y mastica del otro lado.',
+    'Duerme con la cabeza un poco elevada, con una almohada extra, las primeras dos noches.',
+    'Cepíllate los dientes con suavidad, sin tocar la herida.',
+    'Toma los medicamentos tal como te los indicó tu dentista.',
+    'Evita el ejercicio pesado durante 2 días.'
+  ];
+
+  const DEFAULTS = {
+    clinica: "Clínica Dental Nácar", slogan: "Tu sonrisa en buenas manos",
+    direccion: "Calle 5 de Mayo 000, Centro, Puebla, Pue.", telefono: "222 101 8655",
+    whatsapp: "2221018655", correo: "contacto.nacar@gmail.com", color: "#0B3C5D",
+    doctores: [
+      { nombre: "C.D. Mariana Ortega López", especialidad: "Cirujana Dentista", cedula: "0000000", cedulaEsp: "", institucion: "Benemérita Universidad Autónoma de Puebla", principal: true },
+      { nombre: "C.D. Esp. Andrés Medina Ruiz", especialidad: "Especialista en Ortodoncia", cedula: "0000000", cedulaEsp: "0000000", institucion: "Universidad Nacional Autónoma de México", principal: false }
+    ],
+    tratamientos: [
+      ["Consulta de valoración", 300], ["Limpieza dental", 600], ["Resina (por pieza)", 800],
+      ["Extracción simple", 700], ["Extracción de muela del juicio", 2500], ["Endodoncia", 3500],
+      ["Corona de porcelana", 5500], ["Blanqueamiento", 3000], ["Guarda oclusal", 2500],
+      ["Ortodoncia – enganche", 5000], ["Ortodoncia – mensualidad", 800]
+    ],
+    medicamentos: [
+      ["Ibuprofeno 400 mg, tabletas", "Tomar 1 tableta cada 8 horas por 3 días, después de los alimentos."],
+      ["Paracetamol 500 mg, tabletas", "Tomar 1 tableta cada 8 horas por 3 días en caso de dolor."],
+      ["Ketorolaco 10 mg, tabletas", "Tomar 1 tableta cada 8 horas por 3 días en caso de dolor intenso."],
+      ["Naproxeno sódico 550 mg, tabletas", "Tomar 1 tableta cada 12 horas por 3 días."],
+      ["Amoxicilina 500 mg, cápsulas", "Tomar 1 cápsula cada 8 horas por 7 días. No suspender aunque desaparezcan las molestias."],
+      ["Clindamicina 300 mg, cápsulas", "Tomar 1 cápsula cada 8 horas por 7 días."],
+      ["Clorhexidina 0.12%, enjuague bucal", "Enjuagar con 15 ml durante 30 segundos, 2 veces al día por 7 días. No tragar."]
+    ],
+    vigenciaDias: 15, anticipoPct: 30,
+    formasPago: "Efectivo, transferencia y tarjeta de débito o crédito.",
+    leyendaRecibo: "Este recibo no es un comprobante fiscal.",
+    folios: { RX: 1, PRE: 1, REC: 1, CON: 1, JUS: 1 },
+    formularioCobrosUrl: "",
+
+    // Lo siguiente también se edita en Configuración
+    logo: "",
+    indicaciones: [
+      { nombre: "Extracción", texto: EXTRACCION.join('\n') },
+      { nombre: "Cirugía de muela del juicio", texto: EXTRACCION.concat([
+        'Es normal que tengas inflamación y molestia hasta por 3 días; después deben ir bajando.',
+        'También es normal que te cueste un poco abrir la boca durante unos días.',
+        'Regresa a revisión en 7 días.'
+      ]).join('\n') },
+      { nombre: "Endodoncia", texto: [
+        'Es normal sentir molestia al morder durante unos días; irá bajando poco a poco.',
+        'No mastiques cosas duras con ese diente hasta que te coloquemos la corona o la restauración definitiva: mientras tanto el diente está más frágil y se puede romper.',
+        'Espera a que pase la anestesia para comer y ten cuidado de no morderte la mejilla, el labio o la lengua.',
+        'Si se cae o se rompe la curación provisional, avísanos para cambiarla.',
+        'Toma los medicamentos tal como te los indicó tu dentista.',
+        'No faltes a tu cita para la restauración definitiva.'
+      ].join('\n') },
+      { nombre: "Resina", texto: [
+        'Puedes comer en cuanto pase el efecto de la anestesia.',
+        'Mientras tengas la boca dormida, ten cuidado de no morderte la mejilla, el labio o la lengua (sobre todo los niños).',
+        'Es normal sentir sensibilidad al frío durante unos días. Si dura más de 2 semanas, avísanos.',
+        'Si al morder sientes que la resina queda alta o “choca”, llámanos para ajustarla.',
+        'Cepíllate y usa hilo dental como siempre.'
+      ].join('\n') },
+      { nombre: "Limpieza dental", texto: [
+        'Es normal sentir sensibilidad leve al frío durante 1 o 2 días.',
+        'Tus encías pueden sangrar un poco al cepillarte los primeros días; se quita al mantenerlas limpias.',
+        'Si te aplicamos flúor, no comas ni bebas nada durante 30 minutos.',
+        'Cepíllate 3 veces al día con cepillo suave y usa hilo dental diario.',
+        'Tu próxima limpieza es en 6 meses.'
+      ].join('\n') },
+      { nombre: "Blanqueamiento", texto: [
+        'Durante 48 horas sigue la “dieta blanca”: nada de café, té, refresco oscuro, vino tinto, salsas rojas (como salsa de tomate o mole) ni tabaco.',
+        'En esos días sí puedes comer y tomar cosas claras: agua, leche, pollo, pescado, arroz, pasta, pan blanco y queso.',
+        'Es normal sentir sensibilidad temporal; normalmente se quita en 1 a 3 días.',
+        'Si te molesta, usa pasta para dientes sensibles y evita bebidas muy frías o muy calientes.'
+      ].join('\n') },
+      { nombre: "Colocación de brackets", texto: [
+        'Es normal sentir molestia o presión en los dientes durante 3 a 5 días.',
+        'Si algún bracket o alambre te lastima, ponle encima un poco de cera de ortodoncia.',
+        'Evita alimentos duros o pegajosos: palomitas, chicle, caramelos, hielo, nueces y tostadas duras.',
+        'Corta en pedacitos la fruta y la verdura dura (como manzana o zanahoria); no las muerdas directo.',
+        'Cepíllate después de cada comida, con cuidado alrededor de cada bracket.',
+        'Si se despega un bracket o se suelta un alambre, avísanos.',
+        'No faltes a tus citas de ajuste.'
+      ].join('\n') }
+    ],
+    alarmas: [
+      'Tienes sangrado que no se detiene después de 30 minutos de presión con una gasa.',
+      'Te da fiebre.',
+      'La hinchazón aumenta después del tercer día.',
+      'El dolor no se calma con el medicamento.',
+      'Notas una reacción alérgica: ronchas, comezón, hinchazón de labios o cara, o dificultad para respirar.'
+    ].join('\n'),
+    consentimientos: [
+      { nombre: "Extracción",
+        procedimiento: "Extracción (sacar) de la o las piezas dentales indicadas, con anestesia local. Según el caso, puede ser necesario separar la encía, retirar un poco de hueso, dividir el diente en partes y colocar puntos de sutura.",
+        beneficios: "Quitar el dolor o la infección y evitar que el problema dañe el hueso o los dientes vecinos.",
+        riesgos: "Dolor, inflamación y moretón durante algunos días; sangrado; infección o “alveolo seco” (dolor fuerte unos días después); dificultad para abrir la boca; adormecimiento del labio, la barbilla o la lengua, que casi siempre es temporal; que se fracture una raíz o se dañe un diente vecino o una restauración; en muelas de arriba, comunicación con el seno maxilar; reacción a la anestesia.",
+        alternativas: "Según el caso: endodoncia y restauración para conservar el diente, o no hacer tratamiento, con el riesgo de que el dolor o la infección empeoren. Después de una extracción se recomienda reponer el diente (implante, puente o prótesis) para que los demás no se muevan." },
+      { nombre: "Endodoncia",
+        procedimiento: "Tratamiento de conductos: con anestesia local se retira el nervio (pulpa) dañado o infectado del interior del diente, se limpian y desinfectan los conductos y se rellenan y sellan. Puede requerir más de una cita. Al terminar, el diente necesita una restauración definitiva (resina o corona) para no fracturarse.",
+        beneficios: "Quitar el dolor y la infección y conservar el diente natural.",
+        riesgos: "Molestia al morder durante algunos días; inflamación; que un instrumento muy fino se rompa dentro del conducto; perforación de la raíz; conductos tapados o muy curvos que no se puedan tratar completos; fractura del diente si no se coloca la restauración definitiva; que la infección continúe y se necesite repetir el tratamiento, hacer una cirugía o sacar el diente.",
+        alternativas: "Sacar el diente y después reponerlo (implante, puente o prótesis), o no hacer tratamiento, con el riesgo de que el dolor y la infección aumenten." },
+      { nombre: "Blanqueamiento",
+        procedimiento: "Aclarar el color de los dientes con un gel blanqueador, aplicado en el consultorio y/o en casa con guardas, protegiendo las encías.",
+        beneficios: "Dientes más blancos y una sonrisa con mejor apariencia.",
+        riesgos: "Sensibilidad temporal al frío o al calor; irritación de encías; el resultado cambia en cada persona y no es permanente (el color puede volver a oscurecer con café, té, vino o tabaco); las resinas, coronas y carillas no cambian de color, por lo que podría ser necesario cambiarlas para que se vean parejas.",
+        alternativas: "No hacer el tratamiento, una limpieza dental para quitar manchas de la superficie, o carillas o coronas estéticas." },
+      { nombre: "Ortodoncia",
+        procedimiento: "Colocación de aparatos (brackets, alambres, ligas u otros) para mover los dientes y corregir su posición y la mordida. El tratamiento dura varios meses, con citas de ajuste periódicas. Al terminar se usan retenedores para que los dientes no se regresen.",
+        beneficios: "Dientes alineados, mejor mordida, más facilidad para limpiarlos y mejor apariencia de la sonrisa.",
+        riesgos: "Molestias y llagas los primeros días y después de cada ajuste; caries, manchas blancas o inflamación de encías si no hay buena limpieza; acortamiento de las raíces; molestias en la articulación de la mandíbula; que el tratamiento tarde más si se falta a las citas o no se siguen las indicaciones; que los dientes se muevan otra vez si no se usan los retenedores.",
+        alternativas: "No hacer el tratamiento, alineadores transparentes o, en algunos casos, carillas o coronas estéticas." },
+      { nombre: "Procedimiento general",
+        procedimiento: "Realizar el siguiente procedimiento dental, que me fue explicado: ____________________________________________, con anestesia local cuando sea necesaria.",
+        beneficios: "Atender el problema dental diagnosticado, quitar molestias y mejorar la salud y la función de la boca.",
+        riesgos: "Molestia, sensibilidad o inflamación temporal; adormecimiento temporal por la anestesia; reacción a la anestesia o a los materiales; que el resultado no sea el esperado y se necesite otro tratamiento.",
+        alternativas: "Las que el dentista me explicó para mi caso, incluida la opción de no hacer tratamiento y sus consecuencias." }
+    ],
+    aviso: [
+      '{clinica}, con domicilio en {direccion}, es responsable del uso y protección de tus datos personales, y al respecto te informa lo siguiente.',
+      '# ¿Qué datos personales recabamos?',
+      '- Datos de identificación y contacto: nombre, edad, fecha de nacimiento, domicilio, teléfono y correo electrónico.',
+      '- Datos personales sensibles de salud: antecedentes médicos y dentales, enfermedades, alergias, medicamentos que tomas, embarazo, radiografías, fotografías clínicas y la información de tu diagnóstico y tratamiento.',
+      '- Datos de pago y, si la pides, de facturación.',
+      '# ¿Para qué usamos tus datos?',
+      'Finalidades necesarias para atenderte:',
+      '- Darte atención dental: diagnóstico, tratamiento y seguimiento.',
+      '- Integrar y conservar tu expediente clínico, como lo exigen las normas de salud.',
+      '- Agendar, confirmar y dar seguimiento a tus citas.',
+      '- Elaborar presupuestos, cobrar y emitir recibos o facturas.',
+      'Finalidad opcional, solo si nos das permiso:',
+      '- Enviarte recordatorios de revisión o limpieza y promociones por WhatsApp.',
+      'Si no quieres que usemos tus datos para esta finalidad, no marques la casilla correspondiente o avísanos cuando quieras. Esto no afecta tu atención.',
+      '# ¿Con quién compartimos tus datos?',
+      'No vendemos tus datos. Solo los compartimos con laboratorios dentales y especialistas que participen en tu tratamiento, y con las autoridades cuando la ley lo exija.',
+      '# ¿Cómo ejercer tus derechos o limitar el uso de tus datos?',
+      'Puedes pedir acceso, corrección o eliminación de tus datos, oponerte a su uso, retirar tu consentimiento o limitar el uso de tus datos escribiendo a {correo} o en la recepción de la clínica. Te responderemos en un plazo máximo de 20 días hábiles.',
+      '# Cambios a este aviso',
+      'Cualquier cambio a este aviso de privacidad te lo daremos a conocer en la clínica.'
+    ].join('\n'),
+    papelReceta: "media",
+    papelIndicaciones: "carta",
+    revisado: false
+  };
+
+  /* ======================= De aquí para abajo no hace falta tocar nada ======================= */
+  const CLAVE = 'nacar_docs_config_v1';
+  const APP_ID = 'nacar-docs';
+  const FOLIOS = ['RX', 'PRE', 'REC', 'CON', 'JUS'];
+  const NOMBRE_FOLIO = { RX: 'Recetas', PRE: 'Presupuestos', REC: 'Recibos', CON: 'Consentimientos', JUS: 'Justificantes' };
+  const MAX_MEDS = 6;
+
+  /* ---------- Utilidades ---------- */
+  const $ = (s, el) => (el || document).querySelector(s);
+  const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const limpia = s => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  const clonar = o => JSON.parse(JSON.stringify(o));
+  const esUrl = u => /^https?:\/\/\S+$/i.test(String(u || '').trim());
+  const digitos = s => String(s || '').replace(/\D/g, '');
+  const p2 = n => String(n).padStart(2, '0');
+  const redondea = n => Math.round((Number(n) || 0) * 100) / 100;
+  const sinAcentos = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const mismoTexto = (a, b) => sinAcentos(limpia(a)) === sinAcentos(limpia(b));
+  const slug = s => sinAcentos(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'consultorio';
+  const fmtNum = n => (Number.isInteger(n) ? String(n) : String(redondea(n)));
+  const conPunto = s => (/[.!?…:]$/.test(s) ? s : s + '.');
+
+  // Acepta "1,500", "$1500.50", " 800 "
+  function aNumero(v) {
+    const n = parseFloat(String(v == null ? '' : v).replace(/[^\d.]/g, ''));
+    return isFinite(n) ? n : 0;
+  }
+  // Teléfono mexicano a 10 dígitos (quita 52 o 521 si lo trae)
+  function telefono10(s) {
+    let d = digitos(s);
+    if (d.length === 13 && d.startsWith('521')) d = d.slice(3);
+    else if (d.length === 12 && d.startsWith('52')) d = d.slice(2);
+    return d;
+  }
+  function telBonito(d) {
+    if (d.length !== 10) return d;
+    return /^(55|56|33|81)/.test(d) ? `${d.slice(0, 2)} ${d.slice(2, 6)} ${d.slice(6)}` : `${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`;
+  }
+  // "Limpieza dental" -> "limpieza dental" (respeta siglas como "RX")
+  const minusculaInicial = s => (/^[A-ZÁÉÍÓÚÑ][a-záéíóúñü]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s);
+  // Texto con un renglón por elemento; quita viñetas o números que alguien haya escrito al inicio
+  const renglones = t => String(t || '').split(/\r?\n/).map(l => l.replace(/^\s*(?:[-•*·]|\d+[.)])\s+/, '').trim()).filter(Boolean);
+  const parrafos = t => String(t || '').trim().split(/\n\s*\n/).filter(p => p.trim())
+    .map(p => `<p>${esc(p.trim()).replace(/\n/g, '<br>')}</p>`).join('');
+
+  /* ---------- Fechas ---------- */
+  const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const iso = d => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+  const hoyISO = () => iso(new Date());
+  function deISO(s) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || ''));
+    return m ? new Date(+m[1], +m[2] - 1, +m[3], 12) : null;
+  }
+  function fechaLarga(s) {
+    const d = deISO(s);
+    return d ? `${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}` : '';
+  }
+  function sumarDias(s, n) {
+    const d = deISO(s) || new Date();
+    d.setDate(d.getDate() + n);
+    return iso(d);
+  }
+  function horaAhora() {
+    const d = new Date();
+    return `${p2(d.getHours())}:${p2(Math.floor(d.getMinutes() / 5) * 5)}`;
+  }
+
+  /* ---------- Dinero y número a letra ---------- */
+  function miles(n, dec) {
+    const [e, d] = Math.abs(n).toFixed(dec).split('.');
+    return (n < 0 ? '-' : '') + e.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (d ? '.' + d : '');
+  }
+  const pesos = n => '$' + miles(redondea(n), Number.isInteger(redondea(n)) ? 0 : 2);  // $1,600 o $1,600.50
+  const pesos2 = n => '$' + miles(redondea(n), 2);                                      // $1,600.00
+
+  const UNIDADES = ['', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez',
+    'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte',
+    'veintiún', 'veintidós', 'veintitrés', 'veinticuatro', 'veinticinco', 'veintiséis', 'veintisiete', 'veintiocho', 'veintinueve'];
+  const DECENAS = ['', '', '', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+  const CENTENAS = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+  // 0–999. Siempre va antes de un sustantivo ("pesos", "mil"), por eso "un" y "veintiún"
+  function hastaMil(n) {
+    if (n === 100) return 'cien';
+    const c = Math.floor(n / 100), r = n % 100, partes = [];
+    if (c) partes.push(CENTENAS[c]);
+    if (r) partes.push(r < 30 ? UNIDADES[r] : DECENAS[Math.floor(r / 10)] + (r % 10 ? ' y ' + UNIDADES[r % 10] : ''));
+    return partes.join(' ');
+  }
+  function enteroALetras(n) {
+    if (n === 0) return 'cero';
+    const millones = Math.floor(n / 1e6), milesN = Math.floor((n % 1e6) / 1000), resto = n % 1000, partes = [];
+    if (millones) partes.push(millones === 1 ? 'un millón' : enteroALetras(millones) + ' millones');
+    if (milesN) partes.push(milesN === 1 ? 'mil' : hastaMil(milesN) + ' mil');
+    if (resto) partes.push(hastaMil(resto));
+    return partes.join(' ');
+  }
+  // 1500 -> "Mil quinientos pesos 00/100 M.N."
+  function numeroALetras(cantidad) {
+    const totalCentavos = Math.round(Math.abs(Number(cantidad) || 0) * 100);
+    const entero = Math.floor(totalCentavos / 100), centavos = totalCentavos % 100;
+    let t = enteroALetras(entero);
+    if (entero >= 1e6 && entero % 1e6 === 0) t += ' de pesos';
+    else t += entero === 1 ? ' peso' : ' pesos';
+    t += ` ${p2(centavos)}/100 M.N.`;
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+
+  /* ---------- Configuración (solo datos del consultorio y folios) ---------- */
+  function normalizar(c) {
+    const d = clonar(DEFAULTS);
+    if (!c || typeof c !== 'object') return d;
+    const txt = (v, def) => (typeof v === 'string' ? v : def);
+    const num = (v, def) => {
+      if (typeof v === 'number' && isFinite(v)) return v;
+      if (typeof v === 'string' && v.trim() !== '' && isFinite(+v)) return +v;
+      return def;
+    };
+    const lista = v => (Array.isArray(v) ? v : null);
+    const o = {};
+    ['clinica', 'slogan', 'direccion', 'telefono', 'whatsapp', 'correo'].forEach(k => { o[k] = txt(c[k], d[k]); });
+    o.color = /^#[0-9a-f]{6}$/i.test(c.color) ? c.color : d.color;
+    o.doctores = (lista(c.doctores) || d.doctores).filter(x => x && typeof x === 'object').map(x => ({
+      nombre: txt(x.nombre, ''), especialidad: txt(x.especialidad, ''), cedula: txt(x.cedula, ''),
+      cedulaEsp: txt(x.cedulaEsp, ''), institucion: txt(x.institucion, ''), principal: x.principal === true
+    }));
+    if (!o.doctores.length) o.doctores = [{ nombre: '', especialidad: '', cedula: '', cedulaEsp: '', institucion: '', principal: true }];
+    const pr = Math.max(0, o.doctores.findIndex(x => x.principal));
+    o.doctores.forEach((x, i) => { x.principal = i === pr; });
+    o.tratamientos = (lista(c.tratamientos) || d.tratamientos).filter(Array.isArray).map(x => [txt(x[0], ''), Math.max(0, num(x[1], 0))]);
+    o.medicamentos = (lista(c.medicamentos) || d.medicamentos).filter(Array.isArray).map(x => [txt(x[0], ''), txt(x[1], '')]);
+    o.vigenciaDias = Math.min(365, Math.max(1, Math.round(num(c.vigenciaDias, d.vigenciaDias))));
+    o.anticipoPct = Math.min(100, Math.max(0, num(c.anticipoPct, d.anticipoPct)));
+    o.formasPago = txt(c.formasPago, d.formasPago);
+    o.leyendaRecibo = txt(c.leyendaRecibo, d.leyendaRecibo);
+    const f = c.folios && typeof c.folios === 'object' ? c.folios : {};
+    o.folios = {};
+    FOLIOS.forEach(k => { o.folios[k] = Math.max(1, Math.floor(num(f[k], 1))); });
+    o.formularioCobrosUrl = txt(c.formularioCobrosUrl, '');
+    o.logo = typeof c.logo === 'string' && /^data:image\/[a-z+.-]+;base64,/i.test(c.logo) ? c.logo : '';
+    o.indicaciones = (lista(c.indicaciones) || d.indicaciones).filter(x => x && typeof x === 'object')
+      .map(x => ({ nombre: txt(x.nombre, ''), texto: txt(x.texto, '') }));
+    o.alarmas = txt(c.alarmas, d.alarmas);
+    o.consentimientos = (lista(c.consentimientos) || d.consentimientos).filter(x => x && typeof x === 'object')
+      .map(x => ({ nombre: txt(x.nombre, ''), procedimiento: txt(x.procedimiento, ''), beneficios: txt(x.beneficios, ''), riesgos: txt(x.riesgos, ''), alternativas: txt(x.alternativas, '') }));
+    o.aviso = txt(c.aviso, d.aviso);
+    o.papelReceta = c.papelReceta === 'carta' ? 'carta' : 'media';
+    o.papelIndicaciones = c.papelIndicaciones === 'media' ? 'media' : 'carta';
+    o.revisado = c.revisado === true;
+    return o;
+  }
+
+  // Revisa un respaldo antes de reemplazar nada. Acepta el archivo completo o solo la configuración.
+  function validarRespaldo(obj) {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return { error: 'El archivo no tiene el formato de un respaldo.' };
+    const c = obj.config && typeof obj.config === 'object' ? obj.config : obj;
+    const faltan = [];
+    if (typeof c.clinica !== 'string') faltan.push('nombre de la clínica');
+    if (!Array.isArray(c.doctores) || !c.doctores.length || !c.doctores.every(x => x && typeof x.nombre === 'string')) faltan.push('doctores');
+    if (!Array.isArray(c.tratamientos) || !c.tratamientos.every(x => Array.isArray(x) && typeof x[0] === 'string')) faltan.push('tratamientos');
+    if (!Array.isArray(c.medicamentos) || !c.medicamentos.every(x => Array.isArray(x) && typeof x[0] === 'string')) faltan.push('medicamentos');
+    if (!c.folios || typeof c.folios !== 'object') faltan.push('folios');
+    if (faltan.length) return { error: `Este archivo no parece un respaldo de este generador (no trae bien: ${faltan.join(', ')}). No se cambió nada.` };
+    return { config: normalizar(c) };
+  }
+
+  let cfg = normalizar(DEFAULTS);
+  let almacenOk = true;
+  let tGuardar = null;
+
+  function probarAlmacen() {
+    try {
+      const k = CLAVE + '_prueba';
+      localStorage.setItem(k, '1');
+      localStorage.removeItem(k);
+      return true;
+    } catch (e) { return false; }
+  }
+  function cargarConfig() {
+    almacenOk = probarAlmacen();
+    if (!almacenOk) return;
+    try {
+      const t = localStorage.getItem(CLAVE);
+      if (t) cfg = normalizar(JSON.parse(t));
+    } catch (e) { /* Configuración dañada o ilegible: se queda la de ejemplo en memoria */ }
+  }
+  function guardarYa() {
+    clearTimeout(tGuardar);
+    tGuardar = null;
+    try {
+      localStorage.setItem(CLAVE, JSON.stringify(cfg));
+      almacenOk = true;
+    } catch (e) { almacenOk = false; }
+    $('#aviso-almacen').hidden = almacenOk;
+    const est = $('#estado-guardado');
+    if (est) {
+      est.textContent = almacenOk ? '✓ Guardado' : '⚠ Sin guardar';
+      est.classList.toggle('error', !almacenOk);
+    }
+    return almacenOk;
+  }
+  function programarGuardado() {
+    clearTimeout(tGuardar);
+    const est = $('#estado-guardado');
+    if (est) { est.textContent = 'Guardando…'; est.classList.remove('error'); }
+    tGuardar = setTimeout(guardarYa, 400);
+  }
+
+  const idxPrincipal = () => Math.max(0, cfg.doctores.findIndex(d => d.principal));
+  const doctorPrincipal = () => cfg.doctores[idxPrincipal()];
+  const doctorDe = st => cfg.doctores[+st.doctor] || doctorPrincipal();
+  const ciudadDe = dir => String(dir || '').split(',').map(s => s.trim()).filter(Boolean).slice(-2).join(', ');
+
+  // Color del documento: si el elegido es muy claro, se oscurece para que se lea impreso en blanco y negro
+  function hexRgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  const rgbHex = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
+  function luminancia(c) {
+    const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]);
+  }
+  function colorDoc() {
+    let c = hexRgb(cfg.color);
+    for (let i = 0; i < 40 && 1.05 / (luminancia(c) + 0.05) < 4.5; i++) c = c.map(v => v * 0.92);
+    const tinte = c.map(v => v + (255 - v) * 0.9);
+    return { c: rgbHex(c), tinte: rgbHex(tinte) };
+  }
+
+  /* ---------- Datos de la sesión (en memoria; se borran con "Nuevo" o al cerrar) ---------- */
+  const S = { pac: { nombre: '', telefono: '', edad: '' }, docs: {} };
+  let actual = { p: 'inicio', tipo: null };
+  let zoom = false;
+
+  const TIPOS = ['receta', 'presupuesto', 'recibo', 'indicaciones', 'consentimiento', 'privacidad', 'justificante'];
+  const DOCS = {
+    receta: { nombre: 'Receta médica', corto: 'Receta', ico: '💊', desc: 'Con cédula y firma', folio: 'RX', whats: false,
+      ayuda: 'Elige al doctor que firma, escribe los datos del paciente y agrega los medicamentos.' },
+    presupuesto: { nombre: 'Presupuesto / plan de tratamiento', corto: 'Presupuesto', ico: '🧾', desc: 'Plan de tratamiento con total y anticipo', folio: 'PRE', whats: true,
+      ayuda: 'Agrega los tratamientos; el precio se llena solo con tu lista y los totales se calculan solos.' },
+    recibo: { nombre: 'Recibo de pago', corto: 'Recibo de pago', ico: '💵', desc: 'Comprobante de pago (no fiscal)', folio: 'REC', whats: true,
+      ayuda: 'La cantidad se escribe sola con letra. Si capturas el costo total, también calcula el saldo.' },
+    indicaciones: { nombre: 'Indicaciones después del tratamiento', corto: 'Indicaciones', ico: '📋', desc: 'Cuidados en casa, listos para WhatsApp', folio: null, whats: true,
+      ayuda: 'Elige el tratamiento y ajusta el texto si hace falta. Lo más práctico: mandárselo por WhatsApp al salir.' },
+    consentimiento: { nombre: 'Consentimiento informado', corto: 'Consentimiento', ico: '✍️', desc: 'Carta para firmar antes del tratamiento', folio: 'CON', whats: false,
+      ayuda: 'Elige el tratamiento; el texto base aparece abajo para que lo ajustes a este paciente.' },
+    privacidad: { nombre: 'Aviso de privacidad', corto: 'Aviso de privacidad', ico: '🛡️', desc: 'Para firmar en la primera visita', folio: null, whats: false,
+      ayuda: 'Para que el paciente lo lea y lo firme en su primera visita.' },
+    justificante: { nombre: 'Justificante de asistencia', corto: 'Justificante', ico: '🗓️', desc: 'Constancia para la escuela o el trabajo', folio: 'JUS', whats: false,
+      ayuda: 'Constancia de que el paciente vino a consulta, con horario y reposo si aplica.' }
+  };
+  const PAPEL = { receta: st => st.papel, indicaciones: st => st.papel, recibo: () => 'media', justificante: () => 'media' };
+  const papelDe = (tipo, st) => (PAPEL[tipo] ? PAPEL[tipo](st) : 'carta');
+
+  const renglonVacio = () => ({ tratamiento: '', piezas: '', cantidad: '1', precio: '' });
+  function textosConsent(i) {
+    const p = cfg.consentimientos[i] || {};
+    return { procedimiento: p.procedimiento || '', beneficios: p.beneficios || '', riesgos: p.riesgos || '', alternativas: p.alternativas || '' };
+  }
+  const NUEVO = {
+    receta: () => ({ doctor: String(idxPrincipal()), fecha: hoyISO(), peso: '', alergias: '', meds: [], generales: '', papel: cfg.papelReceta, busca: '' }),
+    presupuesto: () => ({ doctor: String(idxPrincipal()), fecha: hoyISO(), renglones: [renglonVacio()], tipoDesc: 'pct', descuento: '', notas: '' }),
+    recibo: () => ({ fecha: hoyISO(), concepto: '', cantidad: '', forma: 'Efectivo', total: '', anteriores: '' }),
+    indicaciones: () => ({ plantilla: '0', texto: cfg.indicaciones[0] ? cfg.indicaciones[0].texto : '', fecha: hoyISO(), papel: cfg.papelIndicaciones }),
+    consentimiento: () => Object.assign({ plantilla: '0', doctor: String(idxPrincipal()), tutor: '', testigo: '', lugar: ciudadDe(cfg.direccion), fecha: hoyISO(), piezas: '' }, textosConsent(0)),
+    privacidad: () => ({ fecha: hoyISO() }),
+    justificante: () => ({ fecha: hoyISO(), entrada: '', salida: horaAhora(), motivo: 'consulta dental', reposo: '', doctor: String(idxPrincipal()) })
+  };
+  function estado(tipo) {
+    if (!S.docs[tipo]) S.docs[tipo] = Object.assign(NUEVO[tipo](), { folio: null });
+    return S.docs[tipo];
+  }
+  function folioTexto(tipo, st) {
+    const pref = DOCS[tipo].folio;
+    if (!pref) return '';
+    const n = st.folio != null ? st.folio : cfg.folios[pref];
+    return `${pref}-${String(n).padStart(4, '0')}`;
+  }
+
+  /* ---------- Cálculos ---------- */
+  function totalesPresupuesto(st, anticipoPct) {
+    const filas = st.renglones.filter(r => limpia(r.tratamiento)).map(r => {
+      const cant = Math.max(1, Math.round(aNumero(r.cantidad)) || 1);
+      const pu = redondea(aNumero(r.precio));
+      return Object.assign({}, r, { cant, pu, importe: redondea(cant * pu) });
+    });
+    const subtotal = redondea(filas.reduce((s, r) => s + r.importe, 0));
+    const valor = aNumero(st.descuento);
+    const pct = st.tipoDesc === 'pct' ? Math.min(100, valor) : null;
+    const descuento = pct != null ? redondea(subtotal * pct / 100) : Math.min(redondea(valor), subtotal);
+    const total = redondea(subtotal - descuento);
+    return { filas, subtotal, descuento, pct, total, anticipo: redondea(total * anticipoPct / 100) };
+  }
+  const vigencia = st => sumarDias(st.fecha || hoyISO(), cfg.vigenciaDias);
+  function saldoRecibo(st) {
+    if (!limpia(st.total)) return null;
+    const total = redondea(aNumero(st.total)), anteriores = redondea(aNumero(st.anteriores)), pago = redondea(aNumero(st.cantidad));
+    return { total, anteriores, pago, saldo: redondea(total - anteriores - pago) };
+  }
+  const edadTexto = v => { const s = limpia(v); return /^\d+$/.test(s) ? (s === '1' ? '1 año' : s + ' años') : s; };
+  const esMenor = v => /mes|d[ií]a|semana/i.test(v) || parseInt(v, 10) < 18;
+  const pesoTexto = v => { const s = limpia(v); return /^\d+([.,]\d+)?$/.test(s) ? s + ' kg' : s; };
+  const cedulas = d => [d.cedula && `Céd. Prof. ${limpia(d.cedula)}`, d.cedulaEsp && `Céd. Esp. ${limpia(d.cedulaEsp)}`].filter(Boolean).join(' · ');
+
+  /* ======================= Formularios ======================= */
+  const valorDe = (st, b) => (b.startsWith('pac.') ? S.pac[b.slice(4)] : st[b]);
+
+  // Campo de texto ligado al estado: b = 'pac.nombre' (dato compartido del paciente) o un campo del documento
+  function campo(st, b, etiqueta, o) {
+    o = o || {};
+    const id = 'f-' + b.replace('.', '-');
+    const v = valorDe(st, b);
+    const at = [`id="${id}"`, 'class="control"', `data-b="${b}"`, 'autocomplete="off"'];
+    if (o.modo) at.push(`inputmode="${o.modo}"`);
+    if (o.ph) at.push(`placeholder="${esc(o.ph)}"`);
+    if (o.cap) at.push(`autocapitalize="${o.cap}"`);
+    if (o.lista) at.push(`list="${o.lista}"`);
+    if (o.ayuda) at.push(`aria-describedby="${id}-ayuda"`);
+    const control = o.area
+      ? `<textarea ${at.join(' ')} rows="${o.filas || 4}">${esc(v)}</textarea>`
+      : `<input type="${o.tipo || 'text'}" ${at.join(' ')} value="${esc(v)}">`;
+    return `<div class="campo"><label for="${id}" id="${id}-etq">${etiqueta}${o.opc ? ' <span class="opc">(opcional)</span>' : ''}</label>${control}${o.ayuda ? `<p class="ayuda" id="${id}-ayuda">${o.ayuda}</p>` : ''}</div>`;
+  }
+  function campoSelect(st, b, etiqueta, opciones) {
+    const id = 'f-' + b;
+    return `<div class="campo"><label for="${id}">${etiqueta}</label><select id="${id}" class="control" data-b="${b}">${
+      opciones.map(([v, t]) => `<option value="${esc(v)}"${String(st[b]) === String(v) ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></div>`;
+  }
+  function campoOpciones(st, b, etiqueta, opciones, clase) {
+    return `<fieldset class="campo"><legend class="etiqueta">${etiqueta}</legend><div class="seg${clase ? ' ' + clase : ''}">${
+      opciones.map(([v, t]) => `<label><input type="radio" name="r-${b}" value="${esc(v)}" data-b="${b}"${String(st[b]) === String(v) ? ' checked' : ''}><span>${t}</span></label>`).join('')}</div></fieldset>`;
+  }
+  const campoDoctor = st => campoSelect(st, 'doctor', 'Doctor que firma',
+    cfg.doctores.map((d, i) => [String(i), limpia(d.nombre) || `Doctor ${i + 1} (sin nombre)`]));
+  const datalistTratamientos = () => `<datalist id="dl-trat">${cfg.tratamientos.filter(t => limpia(t[0]))
+    .map(t => `<option value="${esc(t[0])}" label="${esc(pesos(t[1]))}"></option>`).join('')}</datalist>`;
+  const campoTelefono = (st, ph) => campo(st, 'pac.telefono', 'Teléfono del paciente', { opc: true, tipo: 'tel', modo: 'tel', ph });
+
+  function medsHTML(st) {
+    if (!st.meds.length) return '<p class="vacio">Todavía no agregas medicamentos.</p>';
+    return st.meds.map((m, i) => `
+      <div class="item">
+        <div class="item-cab"><span class="item-num">${i + 1}</span><span class="item-tit" id="med-t-${i}">${esc(limpia(m.nombre) || 'Medicamento')}</span>
+          <span class="item-btns">
+            <button type="button" class="mini" data-accion="subir-med" data-i="${i}" aria-label="Subir medicamento ${i + 1}"${i === 0 ? ' disabled' : ''}>↑</button>
+            <button type="button" class="mini" data-accion="bajar-med" data-i="${i}" aria-label="Bajar medicamento ${i + 1}"${i === st.meds.length - 1 ? ' disabled' : ''}>↓</button>
+            <button type="button" class="mini mini-x" data-accion="quitar-med" data-i="${i}" aria-label="Quitar medicamento ${i + 1}">✕</button>
+          </span></div>
+        <div class="campo"><label for="med-n-${i}">Nombre y presentación</label><input id="med-n-${i}" type="text" class="control" data-l="meds" data-i="${i}" data-b="nombre" autocomplete="off" value="${esc(m.nombre)}"></div>
+        <div class="campo"><label for="med-i-${i}">Cómo tomarlo</label><textarea id="med-i-${i}" class="control" rows="2" data-l="meds" data-i="${i}" data-b="indicacion">${esc(m.indicacion)}</textarea></div>
+      </div>`).join('');
+  }
+  function renglonesHTML(st) {
+    return st.renglones.map((r, i) => `
+      <div class="item">
+        <div class="item-cab"><span class="item-num">${i + 1}</span><span class="item-tit">Tratamiento ${i + 1}</span>
+          <span class="item-btns"><button type="button" class="mini mini-x" data-accion="quitar-renglon" data-i="${i}" aria-label="Quitar tratamiento ${i + 1}">✕</button></span></div>
+        <div class="campo"><label for="ren-t-${i}">Tratamiento</label><input id="ren-t-${i}" type="text" class="control" list="dl-trat" data-l="renglones" data-i="${i}" data-b="tratamiento" autocomplete="off" placeholder="Elige o escribe" value="${esc(r.tratamiento)}"></div>
+        <div class="fila-ren">
+          <div class="campo"><label for="ren-z-${i}">Pieza(s)</label><input id="ren-z-${i}" type="text" class="control" data-l="renglones" data-i="${i}" data-b="piezas" autocomplete="off" placeholder="Ej. 16, 17" value="${esc(r.piezas)}"></div>
+          <div class="campo"><label for="ren-c-${i}">Cant.</label><input id="ren-c-${i}" type="text" class="control" inputmode="numeric" data-l="renglones" data-i="${i}" data-b="cantidad" autocomplete="off" value="${esc(r.cantidad)}"></div>
+          <div class="campo"><label for="ren-p-${i}">Precio unit.</label><input id="ren-p-${i}" type="text" class="control" inputmode="decimal" data-l="renglones" data-i="${i}" data-b="precio" autocomplete="off" placeholder="$" value="${esc(r.precio)}"></div>
+        </div>
+        <p class="importe">Importe: <b id="ren-imp-${i}">${pesos(importeDe(r))}</b></p>
+      </div>`).join('');
+  }
+  const importeDe = r => redondea((Math.max(1, Math.round(aNumero(r.cantidad)) || 1)) * aNumero(r.precio));
+
+  function vivoPresupuesto(st) {
+    const t = totalesPresupuesto(st, cfg.anticipoPct);
+    return `<dl class="totales">
+      <div><dt>Subtotal</dt><dd>${pesos(t.subtotal)}</dd></div>
+      ${t.descuento > 0 ? `<div><dt>Descuento${t.pct != null ? ` (${fmtNum(t.pct)}%)` : ''}</dt><dd>−${pesos(t.descuento)}</dd></div>` : ''}
+      <div class="total"><dt>Total</dt><dd>${pesos(t.total)}</dd></div>
+      <div><dt>Anticipo sugerido (${fmtNum(cfg.anticipoPct)}%)</dt><dd>${pesos(t.anticipo)}</dd></div>
+      <div><dt>Vigente hasta</dt><dd>${fechaLarga(vigencia(st))}</dd></div>
+    </dl>`;
+  }
+  function vivoRecibo(st) {
+    const s = saldoRecibo(st);
+    if (!s) return '<p class="ayuda" style="margin:0">Si lo capturas, el recibo muestra cuánto falta por pagar.</p>';
+    if (s.saldo < 0) return `<p style="color:var(--coral-osc);font-weight:700">Los pagos suman ${pesos2(-s.saldo)} más que el costo total. Revisa las cantidades.</p>`;
+    return `<dl class="totales"><div class="total"><dt>Saldo pendiente</dt><dd>${pesos2(s.saldo)}</dd></div></dl>`;
+  }
+  const letraDe = st => (aNumero(st.cantidad) > 0 ? numeroALetras(aNumero(st.cantidad)) : '');
+
+  const FORM = {
+    receta: st => {
+      const d = doctorDe(st);
+      return campoDoctor(st) +
+        `<div class="alerta" id="candado" role="alert"${limpia(d.cedula) ? ' hidden' : ''}>
+          <p><b>Agrega la cédula profesional en Configuración.</b> Sin cédula la receta no es válida.</p>
+          <a class="btn btn-linea" href="#/config"><span aria-hidden="true">⚙</span> Ir a Configuración</a></div>` +
+        campo(st, 'pac.nombre', 'Paciente', { cap: 'words', ph: 'Nombre completo' }) +
+        `<div class="fila">${campo(st, 'pac.edad', 'Edad', { modo: 'numeric', ph: 'Ej. 34' })}${campo(st, 'peso', 'Peso', { opc: true, modo: 'decimal', ph: 'kg' })}</div>` +
+        campo(st, 'fecha', 'Fecha', { tipo: 'date' }) +
+        campo(st, 'alergias', 'Alergias', { opc: true, ph: 'Ej. penicilina' }) +
+        campoOpciones(st, 'papel', 'Tamaño de hoja', [['media', 'Media carta'], ['carta', 'Carta']]) +
+        `<h2 class="sub">Medicamentos</h2>
+        <div class="campo">
+          <label for="f-busca">Agregar medicamento</label>
+          <div class="buscador-fila">
+            <input id="f-busca" type="text" class="control" list="dl-meds" data-b="busca" autocomplete="off" placeholder="Ej. Ibuprofeno" aria-describedby="meds-ayuda" value="${esc(st.busca)}">
+            <button type="button" class="btn btn-azul" data-accion="agregar-med">Agregar</button>
+          </div>
+          <datalist id="dl-meds">${cfg.medicamentos.filter(m => limpia(m[0])).map(m => `<option value="${esc(m[0])}"></option>`).join('')}</datalist>
+          <p class="ayuda" id="meds-ayuda"></p>
+        </div>
+        <div class="lista-items" id="lista-meds">${medsHTML(st)}</div>` +
+        campo(st, 'generales', 'Indicaciones generales', { opc: true, area: true, filas: 3, ph: 'Ej. Dieta blanda. Regresar a revisión en 7 días.' }) +
+        '<p class="nota-gris" style="margin-bottom:18px">Para medicamentos controlados que requieren receta especial, usa el formato oficial.</p>';
+    },
+    presupuesto: st => campoDoctor(st) +
+      campo(st, 'pac.nombre', 'Paciente', { cap: 'words', ph: 'Nombre completo' }) +
+      `<div class="fila-ancha">${campoTelefono(st, 'Para mandárselo por WhatsApp')}${campo(st, 'fecha', 'Fecha', { tipo: 'date' })}</div>` +
+      `<h2 class="sub">Tratamientos</h2>${datalistTratamientos()}
+      <div class="lista-items" id="lista-renglones">${renglonesHTML(st)}</div>
+      <button type="button" class="btn btn-suave btn-bloque" data-accion="agregar-renglon" style="margin-bottom:22px">＋ Agregar otro tratamiento</button>
+      <h2 class="sub">Descuento</h2>
+      <div class="fila">${campoOpciones(st, 'tipoDesc', 'Descuento en', [['pct', '%'], ['monto', '$']])}${
+        campo(st, 'descuento', st.tipoDesc === 'pct' ? 'Cuánto (%)' : 'Cuánto ($)', { opc: true, modo: 'decimal', ph: '0' })}</div>` +
+      campo(st, 'notas', 'Notas', { opc: true, area: true, filas: 3, ph: 'Ej. El tratamiento se hará en 3 citas.' }) +
+      `<div class="vivo" id="vivo" aria-live="polite">${vivoPresupuesto(st)}</div>`,
+    recibo: st => `<div class="fila-ancha">${campo(st, 'fecha', 'Fecha', { tipo: 'date' })}${campoTelefono(st, 'Para mandarle el recibo')}</div>` +
+      campo(st, 'pac.nombre', 'Recibí de', { cap: 'words', ph: 'Nombre del paciente' }) +
+      campo(st, 'concepto', 'Concepto', { lista: 'dl-trat', ph: 'Elige un tratamiento o escribe' }) + datalistTratamientos() +
+      campo(st, 'cantidad', 'Cantidad recibida ($)', { modo: 'decimal', ph: '0.00' }) +
+      `<p class="letra" id="letra"${letraDe(st) ? '' : ' hidden'}>${esc(letraDe(st))}</p>` +
+      campoOpciones(st, 'forma', 'Forma de pago', [['Efectivo', '<span aria-hidden="true">💵</span>Efectivo'], ['Transferencia', '<span aria-hidden="true">🏦</span>Transferencia'], ['Tarjeta', '<span aria-hidden="true">💳</span>Tarjeta']], 'seg-3') +
+      `<fieldset class="grupo"><legend>Saldo del tratamiento <span class="opc">(opcional)</span></legend>
+        <div class="fila">${campo(st, 'total', 'Costo total ($)', { modo: 'decimal' })}${campo(st, 'anteriores', 'Pagos anteriores ($)', { modo: 'decimal' })}</div>
+        <div class="vivo" id="vivo" aria-live="polite">${vivoRecibo(st)}</div></fieldset>`,
+    indicaciones: st => (cfg.indicaciones.length
+        ? campoSelect(st, 'plantilla', 'Tratamiento', cfg.indicaciones.map((p, i) => [String(i), limpia(p.nombre) || `Plantilla ${i + 1}`]))
+        : '<p class="falta">No tienes plantillas de indicaciones. Agrégalas en ⚙ Configuración, o escribe aquí abajo.</p>') +
+      campo(st, 'pac.nombre', 'Paciente', { opc: true, cap: 'words' }) +
+      `<div class="fila-ancha">${campoTelefono(st, 'Para mandárselas por WhatsApp')}${campo(st, 'fecha', 'Fecha', { tipo: 'date' })}</div>` +
+      campoOpciones(st, 'papel', 'Tamaño de hoja', [['carta', 'Carta'], ['media', 'Media carta']]) +
+      campo(st, 'texto', 'Indicaciones (una por renglón)', { area: true, filas: 12, ayuda: 'Ajústalas a este paciente. El recuadro “Llámanos de inmediato si…” se agrega solo; lo cambias en Configuración.' }),
+    consentimiento: st => (cfg.consentimientos.length
+        ? campoSelect(st, 'plantilla', 'Tratamiento', cfg.consentimientos.map((p, i) => [String(i), limpia(p.nombre) || `Plantilla ${i + 1}`]))
+        : '<p class="falta">No tienes textos de consentimiento. Agrégalos en ⚙ Configuración, o escribe aquí abajo.</p>') +
+      campo(st, 'pac.nombre', 'Paciente', { cap: 'words', ph: 'Nombre completo' }) +
+      campo(st, 'pac.edad', 'Edad', { modo: 'numeric', ph: 'Ej. 34' }) +
+      campo(st, 'tutor', 'Nombre del padre, madre o tutor', { opc: true, cap: 'words', ayuda: 'Solo si el paciente es menor de edad.' }) +
+      campoDoctor(st) +
+      campo(st, 'testigo', 'Testigo', { opc: true, cap: 'words' }) +
+      `<div class="fila-ancha">${campo(st, 'lugar', 'Lugar')}${campo(st, 'fecha', 'Fecha', { tipo: 'date' })}</div>` +
+      campo(st, 'piezas', 'Pieza(s) o zona', { opc: true, ph: 'Ej. 38 y 48' }) +
+      '<h2 class="sub">Texto de la carta</h2><p class="ayuda" style="margin:-6px 0 14px">Viene del texto base del tratamiento. Ajústalo a este paciente si hace falta.</p>' +
+      campo(st, 'procedimiento', 'Procedimiento que se autoriza', { area: true, filas: 4 }) +
+      campo(st, 'beneficios', 'Beneficios esperados', { area: true, filas: 3 }) +
+      campo(st, 'riesgos', 'Riesgos frecuentes', { area: true, filas: 6 }) +
+      campo(st, 'alternativas', 'Alternativas', { area: true, filas: 3 }),
+    privacidad: st => campo(st, 'pac.nombre', 'Paciente', { opc: true, cap: 'words', ayuda: 'Si lo dejas vacío, el paciente lo escribe a mano.' }) +
+      campo(st, 'fecha', 'Fecha', { tipo: 'date' }) +
+      '<p class="nota-gris" style="margin-bottom:18px">El texto del aviso se cambia en ⚙ Configuración → Aviso de privacidad.</p>',
+    justificante: st => campo(st, 'pac.nombre', 'Paciente', { cap: 'words', ph: 'Nombre completo' }) +
+      campo(st, 'fecha', 'Fecha', { tipo: 'date' }) +
+      `<div class="fila">${campo(st, 'entrada', 'Hora de entrada', { tipo: 'time' })}${campo(st, 'salida', 'Hora de salida', { tipo: 'time' })}</div>` +
+      campo(st, 'motivo', 'Motivo', { opc: true, ph: 'consulta dental' }) +
+      campo(st, 'reposo', 'Días de reposo recomendados', { opc: true, modo: 'numeric', ph: 'Ej. 2' }) +
+      campoDoctor(st)
+  };
+
+  // Lo que se actualiza en vivo mientras escriben
+  const REACCION = {
+    receta: (st, b, t, e) => {
+      if (b === 'doctor') $('#candado').hidden = !!limpia(doctorDe(st).cedula);
+      else if (t.dataset.l === 'meds' && b === 'nombre') $('#med-t-' + t.dataset.i).textContent = limpia(t.value) || 'Medicamento';
+      else if (b === 'papel') { cfg.papelReceta = st.papel; programarGuardado(); }
+      else if (b === 'busca' && e.type === 'input' && (!e.inputType || e.inputType === 'insertReplacementText')) {
+        // Elegido de la lista: se agrega solo
+        if (cfg.medicamentos.some(m => mismoTexto(m[0], t.value))) agregarMed(t.value);
+      }
+    },
+    presupuesto: (st, b, t) => {
+      if (t.dataset.l === 'renglones') {
+        const i = +t.dataset.i, r = st.renglones[i];
+        if (b === 'tratamiento') {
+          const cat = cfg.tratamientos.find(x => mismoTexto(x[0], t.value));
+          if (cat) {
+            if (t.value !== cat[0]) { r.tratamiento = cat[0]; t.value = cat[0]; }
+            r.precio = String(cat[1]);
+            $('#ren-p-' + i).value = r.precio;
+          }
+        }
+        const imp = $('#ren-imp-' + i);
+        if (imp) imp.textContent = pesos(importeDe(r));
+      }
+      if (b === 'tipoDesc') $('#f-descuento-etq').innerHTML = `${st.tipoDesc === 'pct' ? 'Cuánto (%)' : 'Cuánto ($)'} <span class="opc">(opcional)</span>`;
+      $('#vivo').innerHTML = vivoPresupuesto(st);
+    },
+    recibo: st => {
+      const l = letraDe(st), el = $('#letra');
+      el.textContent = l;
+      el.hidden = !l;
+      $('#vivo').innerHTML = vivoRecibo(st);
+    },
+    indicaciones: (st, b) => {
+      if (b === 'plantilla') {
+        const p = cfg.indicaciones[+st.plantilla];
+        st.texto = p ? p.texto : '';
+        $('#f-texto').value = st.texto;
+      } else if (b === 'papel') { cfg.papelIndicaciones = st.papel; programarGuardado(); }
+    },
+    consentimiento: (st, b) => {
+      if (b !== 'plantilla') return;
+      Object.assign(st, textosConsent(+st.plantilla));
+      ['procedimiento', 'beneficios', 'riesgos', 'alternativas'].forEach(k => { $('#f-' + k).value = st[k]; });
+    }
+  };
+
+  /* ---------- Validación antes de ver el documento ---------- */
+  function revisarTelefono(e) {
+    const t = limpia(S.pac.telefono);
+    if (t && telefono10(t).length !== 10) e.push(['f-pac-telefono', 'El teléfono del paciente debe tener 10 dígitos.']);
+  }
+  const requerido = (e, v, id, msg) => { if (!limpia(v)) e.push([id, msg]); };
+  const VALIDAR = {
+    receta: st => {
+      const e = [];
+      if (!limpia(doctorDe(st).cedula)) e.push(['f-doctor', 'Agrega la cédula profesional en Configuración. Sin cédula la receta no es válida.']);
+      requerido(e, S.pac.nombre, 'f-pac-nombre', 'Escribe el nombre del paciente.');
+      requerido(e, S.pac.edad, 'f-pac-edad', 'Escribe la edad del paciente.');
+      requerido(e, st.fecha, 'f-fecha', 'Elige la fecha.');
+      if (!st.meds.some(m => limpia(m.nombre))) e.push(['f-busca', 'Agrega al menos un medicamento.']);
+      return e;
+    },
+    presupuesto: st => {
+      const e = [];
+      requerido(e, S.pac.nombre, 'f-pac-nombre', 'Escribe el nombre del paciente.');
+      revisarTelefono(e);
+      requerido(e, st.fecha, 'f-fecha', 'Elige la fecha.');
+      if (!st.renglones.some(r => limpia(r.tratamiento))) e.push(['ren-t-0', 'Agrega al menos un tratamiento.']);
+      st.renglones.forEach((r, i) => {
+        if (limpia(r.tratamiento) && !limpia(r.precio)) e.push([`ren-p-${i}`, `Escribe el precio de “${limpia(r.tratamiento)}”.`]);
+      });
+      if (st.tipoDesc === 'pct' && aNumero(st.descuento) > 100) e.push(['f-descuento', 'El descuento no puede ser mayor a 100%.']);
+      return e;
+    },
+    recibo: st => {
+      const e = [];
+      requerido(e, st.fecha, 'f-fecha', 'Elige la fecha.');
+      revisarTelefono(e);
+      requerido(e, S.pac.nombre, 'f-pac-nombre', 'Escribe de quién recibiste el pago.');
+      requerido(e, st.concepto, 'f-concepto', 'Escribe el concepto del pago.');
+      if (!(aNumero(st.cantidad) > 0)) e.push(['f-cantidad', 'Escribe la cantidad recibida.']);
+      const s = saldoRecibo(st);
+      if (s && s.saldo < 0) e.push(['f-total', 'Los pagos suman más que el costo total. Revisa las cantidades.']);
+      return e;
+    },
+    indicaciones: st => {
+      const e = [];
+      revisarTelefono(e);
+      requerido(e, st.fecha, 'f-fecha', 'Elige la fecha.');
+      if (!renglones(st.texto).length) e.push(['f-texto', 'Escribe al menos una indicación.']);
+      return e;
+    },
+    consentimiento: st => {
+      const e = [];
+      requerido(e, S.pac.nombre, 'f-pac-nombre', 'Escribe el nombre del paciente.');
+      requerido(e, S.pac.edad, 'f-pac-edad', 'Escribe la edad del paciente.');
+      if (limpia(S.pac.edad) && esMenor(S.pac.edad) && !limpia(st.tutor)) e.push(['f-tutor', 'El paciente es menor de edad: escribe el nombre del padre, madre o tutor.']);
+      requerido(e, doctorDe(st).nombre, 'f-doctor', 'El doctor elegido no tiene nombre. Complétalo en Configuración.');
+      requerido(e, st.lugar, 'f-lugar', 'Escribe el lugar.');
+      requerido(e, st.fecha, 'f-fecha', 'Elige la fecha.');
+      requerido(e, st.procedimiento, 'f-procedimiento', 'Describe el procedimiento que se autoriza.');
+      return e;
+    },
+    privacidad: st => {
+      const e = [];
+      requerido(e, st.fecha, 'f-fecha', 'Elige la fecha.');
+      return e;
+    },
+    justificante: st => {
+      const e = [];
+      requerido(e, S.pac.nombre, 'f-pac-nombre', 'Escribe el nombre del paciente.');
+      requerido(e, st.fecha, 'f-fecha', 'Elige la fecha.');
+      requerido(e, st.entrada, 'f-entrada', 'Escribe la hora de entrada.');
+      requerido(e, st.salida, 'f-salida', 'Escribe la hora de salida.');
+      if (st.entrada && st.salida && st.salida <= st.entrada) e.push(['f-salida', 'La hora de salida debe ser después de la de entrada.']);
+      requerido(e, doctorDe(st).nombre, 'f-doctor', 'El doctor elegido no tiene nombre. Complétalo en Configuración.');
+      return e;
+    }
+  };
+
+  /* ======================= Documentos ======================= */
+  const D_DIENTE = 'M10.2 3.5C6.6 3.5 4 6.2 4 10.2C4 13.4 5.2 15.6 6 18.2C6.8 20.8 7.1 23.8 7.7 26.4C8.2 28.5 9 29.5 10.1 29.5C11.6 29.5 12.1 27.8 12.6 25.4L13.2 22.6C13.5 21.3 14.6 20.6 16 20.6C17.4 20.6 18.5 21.3 18.8 22.6L19.4 25.4C19.9 27.8 20.4 29.5 21.9 29.5C23 29.5 23.8 28.5 24.3 26.4C24.9 23.8 25.2 20.8 26 18.2C26.8 15.6 28 13.4 28 10.2C28 6.2 25.4 3.5 21.8 3.5C19.6 3.5 18.2 4.6 16 4.6C13.8 4.6 12.4 3.5 10.2 3.5Z';
+  const SVG_DIENTE = `<svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path fill="#2EC4B6" d="${D_DIENTE}"/><path d="M8.6 10.4C8.6 8.3 9.8 6.9 11.6 6.6" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+
+  function telefonosClinica() {
+    const tel = limpia(cfg.telefono), wa = telefono10(cfg.whatsapp);
+    const waTxt = wa.length === 10 ? telBonito(wa) : '';
+    if (tel && waTxt && telefono10(tel) === wa) return `Llámanos o escríbenos por WhatsApp al ${tel}.`;
+    if (tel && waTxt) return `Llámanos al ${tel} o escríbenos por WhatsApp al ${waTxt}.`;
+    if (tel || waTxt) return `Llámanos al ${tel || waTxt}.`;
+    return '';
+  }
+
+  // Encabezado común: logo, clínica, folio, doctor con cédulas, dirección y teléfonos, título
+  function cabDoc(o) {
+    const d = o.doctor;
+    const logo = cfg.logo ? `<img src="${esc(cfg.logo)}" alt="">` : `<svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="${D_DIENTE}"/></svg>`;
+    const tel = limpia(cfg.telefono), wa = telefono10(cfg.whatsapp);
+    const tels = tel && wa.length === 10 && telefono10(tel) === wa
+      ? `<span class="nw">Tel. y WhatsApp ${esc(tel)}</span>`
+      : [tel && `<span class="nw">Tel. ${esc(tel)}</span>`, wa.length === 10 && `<span class="nw">WhatsApp ${telBonito(wa)}</span>`].filter(Boolean).join(' · ');
+    const ced = d ? cedulas(d) : '';
+    // "Calle 5 de Mayo 000, Centro" en un renglón y "Puebla, Pue." en otro
+    const dir = limpia(cfg.direccion), ciudad = ciudadDe(dir);
+    const calle = ciudad && ciudad !== dir && dir.endsWith(ciudad) ? dir.slice(0, -ciudad.length).replace(/[,\s]+$/, '') : '';
+    const domicilio = calle ? `<span>${esc(calle)}</span><span>${esc(ciudad)}</span>` : dir ? `<span>${esc(dir)}</span>` : '';
+    return `<header class="d-cab">
+        <div class="d-logo">${logo}</div>
+        <div class="d-clinica"><p class="d-nombre">${esc(cfg.clinica)}</p>${limpia(cfg.slogan) ? `<p class="d-slogan">${esc(cfg.slogan)}</p>` : ''}</div>
+        ${o.folio ? `<div class="d-folio"><small>Folio</small><b>${esc(o.folio)}</b></div>` : ''}
+      </header>
+      <div class="d-datos">
+        ${d ? `<div class="d-medico"><b>${esc(d.nombre)}</b>${limpia(d.especialidad) ? `<span>${esc(d.especialidad)}</span>` : ''}${ced ? `<span>${esc(ced)}</span>` : ''}${limpia(d.institucion) ? `<span>Título expedido por ${esc(d.institucion)}</span>` : ''}</div>` : '<div></div>'}
+        <div class="d-contacto">${domicilio}${tels ? `<span>${tels}</span>` : ''}${limpia(cfg.correo) ? `<span>${esc(cfg.correo)}</span>` : ''}</div>
+      </div>
+      <div class="d-tit${o.largo ? ' largo' : ''}"><h2>${esc(o.titulo)}</h2>${o.fecha ? `<p class="d-fecha">${esc(o.fecha)}</p>` : ''}</div>`;
+  }
+  const dato = (etq, v, clase) => `<div class="d-dato${clase ? ' ' + clase : ''}"><small>${etq}</small><span>${esc(limpia(v))}</span></div>`;
+  function firmas(lista, clase) {
+    return `<div class="d-firmas${clase ? ' ' + clase : ''}">${lista.map(f => `<div class="d-firma"><p class="d-sobre">${esc(limpia(f.sobre))}</p><div class="d-linea"><b>${esc(f.etiqueta)}</b>${
+      (f.detalle || []).filter(x => limpia(x)).map(x => `<span>${esc(x)}</span>`).join('')}</div></div>`).join('')}</div>`;
+  }
+  const tituloIndicaciones = st => {
+    const p = cfg.indicaciones[+st.plantilla];
+    return `Indicaciones después de tu ${p && limpia(p.nombre) ? minusculaInicial(limpia(p.nombre)) : 'tratamiento'}`;
+  };
+  function formatoAviso(t) {
+    const d = doctorPrincipal();
+    const datos = { clinica: cfg.clinica, direccion: cfg.direccion, telefono: cfg.telefono, correo: cfg.correo, doctor: d ? d.nombre : '' };
+    const con = s => esc(s).replace(/\{(clinica|direccion|telefono|correo|doctor)\}/g, (m, k) => esc(limpia(datos[k])));
+    let h = '', enLista = false;
+    String(t || '').split(/\r?\n/).forEach(l => {
+      const s = l.trim();
+      const vineta = /^[-•*]\s+/.test(s);
+      if (enLista && !vineta) { h += '</ul>'; enLista = false; }
+      if (!s) return;
+      if (/^#\s*/.test(s)) h += `<h3>${con(s.replace(/^#+\s*/, ''))}</h3>`;
+      else if (vineta) { if (!enLista) { h += '<ul>'; enLista = true; } h += `<li>${con(s.replace(/^[-•*]\s+/, ''))}</li>`; }
+      else h += `<p>${con(s)}</p>`;
+    });
+    return h + (enLista ? '</ul>' : '');
+  }
+
+  const DOC = {
+    receta: st => {
+      const d = doctorDe(st);
+      const meds = st.meds.filter(m => limpia(m.nombre));
+      return cabDoc({ doctor: d, folio: folioTexto('receta', st), titulo: 'Receta médica', fecha: fechaLarga(st.fecha) }) +
+        `<section class="d-pac">${dato('Paciente', S.pac.nombre, 'ancho')}${dato('Edad', edadTexto(S.pac.edad))}${limpia(st.peso) ? dato('Peso', pesoTexto(st.peso)) : ''}</section>
+        ${limpia(st.alergias) ? `<p class="d-alergia"><span aria-hidden="true">⚠&#xFE0E;</span> Alergias: ${esc(limpia(st.alergias))}</p>` : ''}
+        <section class="d-rx">
+          <div class="d-rx-sim" aria-hidden="true">℞</div>
+          <ol class="d-meds">${meds.map(m => `<li><b>${esc(limpia(m.nombre))}</b>${m.indicacion.trim() ? `<span>${esc(m.indicacion.trim()).replace(/\n/g, '<br>')}</span>` : ''}</li>`).join('')}</ol>
+        </section>
+        ${limpia(st.generales) ? `<section class="d-bloque"><h3>Indicaciones generales</h3>${parrafos(st.generales)}</section>` : ''}
+        <div class="d-empuja"></div>` +
+        firmas([{ etiqueta: 'Firma del Cirujano Dentista', detalle: [d.nombre, cedulas(d)] }]);
+    },
+    presupuesto: st => {
+      const d = doctorDe(st), t = totalesPresupuesto(st, cfg.anticipoPct), tel = telefono10(S.pac.telefono);
+      return cabDoc({ doctor: d, folio: folioTexto('presupuesto', st), titulo: 'Presupuesto y plan de tratamiento', fecha: fechaLarga(st.fecha) }) +
+        `<section class="d-pac">${dato('Paciente', S.pac.nombre, 'ancho')}${tel.length === 10 ? dato('Teléfono', telBonito(tel)) : ''}</section>
+        <table class="d-tabla">
+          <thead><tr><th class="c-num">#</th><th>Tratamiento</th><th>Pieza(s)</th><th class="num">Cant.</th><th class="num">Precio unit.</th><th class="num">Importe</th></tr></thead>
+          <tbody>${t.filas.map((r, i) => `<tr><td class="c-num">${i + 1}</td><td>${esc(limpia(r.tratamiento))}</td><td>${esc(limpia(r.piezas)) || '—'}</td><td class="num">${r.cant}</td><td class="num">${pesos2(r.pu)}</td><td class="num">${pesos2(r.importe)}</td></tr>`).join('')}</tbody>
+        </table>
+        <div class="d-resumen">
+          <div class="d-info">
+            ${limpia(cfg.formasPago) ? `<p><b>Formas de pago:</b> ${esc(cfg.formasPago)}</p>` : ''}
+            <p><b>Vigencia:</b> este presupuesto es válido hasta el ${fechaLarga(vigencia(st))} (${cfg.vigenciaDias} días).</p>
+            ${limpia(st.notas) ? `<div><b>Notas:</b>${parrafos(st.notas)}</div>` : ''}
+          </div>
+          <table class="d-totales"><tbody>
+            <tr><td>Subtotal</td><td class="num">${pesos2(t.subtotal)}</td></tr>
+            ${t.descuento > 0 ? `<tr><td>Descuento${t.pct != null ? ` (${fmtNum(t.pct)}%)` : ''}</td><td class="num">−${pesos2(t.descuento)}</td></tr>` : ''}
+            <tr class="d-total"><td>Total</td><td class="num">${pesos2(t.total)}</td></tr>
+            ${t.anticipo > 0 ? `<tr class="d-anticipo"><td>Anticipo sugerido para iniciar (${fmtNum(cfg.anticipoPct)}%)</td><td class="num">${pesos2(t.anticipo)}</td></tr>` : ''}
+          </tbody></table>
+        </div>
+        <div class="d-empuja"></div>
+        <p class="d-acepto">Acepto el plan de tratamiento.</p>` +
+        firmas([
+          { etiqueta: 'Nombre y firma del paciente', sobre: S.pac.nombre },
+          { etiqueta: 'Cirujano dentista', sobre: d.nombre, detalle: [cedulas(d)] }
+        ]);
+    },
+    recibo: st => {
+      const cant = aNumero(st.cantidad), s = saldoRecibo(st);
+      return cabDoc({ doctor: doctorPrincipal(), folio: folioTexto('recibo', st), titulo: 'Recibo de pago', fecha: fechaLarga(st.fecha) }) +
+        `<div class="d-bueno"><small>Bueno por</small><b>${pesos2(cant)}</b></div>
+        <p class="d-recibi">Recibí de <b>${esc(limpia(S.pac.nombre))}</b> la cantidad de <b>${pesos2(cant)}</b> (${esc(numeroALetras(cant))}).</p>
+        <dl class="d-dl"><div><dt>Concepto</dt><dd>${esc(limpia(st.concepto))}</dd></div><div><dt>Forma de pago</dt><dd>${esc(st.forma)}</dd></div></dl>
+        ${s ? `<table class="d-totales d-saldo"><tbody>
+          <tr><td>Costo total del tratamiento</td><td class="num">${pesos2(s.total)}</td></tr>
+          ${s.anteriores ? `<tr><td>Pagos anteriores</td><td class="num">${pesos2(s.anteriores)}</td></tr>` : ''}
+          <tr><td>Este pago</td><td class="num">${pesos2(s.pago)}</td></tr>
+          <tr class="d-total"><td>Saldo pendiente</td><td class="num">${pesos2(Math.max(0, s.saldo))}</td></tr>
+        </tbody></table>` : ''}
+        ${limpia(cfg.leyendaRecibo) ? `<p class="d-leyenda">${esc(cfg.leyendaRecibo)}</p>` : ''}
+        <div class="d-empuja"></div>` +
+        firmas([{ etiqueta: 'Recibió', detalle: ['Nombre y firma', cfg.clinica] }]);
+    },
+    indicaciones: st => {
+      const items = renglones(st.texto), alarmas = renglones(cfg.alarmas), tel = telefonosClinica();
+      return cabDoc({ doctor: doctorPrincipal(), titulo: tituloIndicaciones(st), fecha: fechaLarga(st.fecha), largo: true }) +
+        `<section class="d-pac">${limpia(S.pac.nombre) ? dato('Paciente', S.pac.nombre, 'ancho') : '<div class="d-dato ancho"><small>Paciente</small><span class="d-blanco"></span></div>'}</section>
+        <ul class="d-vinetas">${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+        ${alarmas.length || tel ? `<div class="d-caja"><h3>Llámanos de inmediato si…</h3>${alarmas.length ? `<ul>${alarmas.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}${tel ? `<p class="d-tel">${esc(tel)}</p>` : ''}</div>` : ''}`;
+    },
+    consentimiento: st => {
+      const d = doctorDe(st), pac = limpia(S.pac.nombre), tutor = limpia(st.tutor), edad = edadTexto(S.pac.edad);
+      const deEdad = edad ? `, de ${esc(edad)} de edad` : '';
+      const quien = `<b>${esc(limpia(d.nombre))}</b>${limpia(d.cedula) ? ` (Céd. Prof. ${esc(limpia(d.cedula))})` : ''} y a su equipo de ${esc(cfg.clinica)}`;
+      const intro = tutor
+        ? `Yo, <b>${esc(tutor)}</b>, en mi carácter de padre, madre o tutor de <b>${esc(pac)}</b>${deEdad}, autorizo a ${quien} a realizar el procedimiento que se describe a continuación.`
+        : `Yo, <b>${esc(pac)}</b>${deEdad}, autorizo a ${quien} a realizar el procedimiento que se describe a continuación.`;
+      return cabDoc({ doctor: d, folio: folioTexto('consentimiento', st), titulo: 'Carta de consentimiento bajo información', largo: true }) +
+        `<p class="d-lugar">En ${esc(limpia(st.lugar))}, a ${fechaLarga(st.fecha)}.</p>
+        <p class="d-intro">${intro}</p>
+        <ol class="d-secciones">
+          <li><h3>Procedimiento que se autoriza</h3>${parrafos(st.procedimiento)}${limpia(st.piezas) ? `<p><b>Pieza(s) o zona:</b> ${esc(limpia(st.piezas))}</p>` : ''}</li>
+          ${limpia(st.beneficios) ? `<li><h3>Beneficios esperados</h3>${parrafos(st.beneficios)}</li>` : ''}
+          ${limpia(st.riesgos) ? `<li><h3>Riesgos frecuentes</h3>${parrafos(st.riesgos)}</li>` : ''}
+          ${limpia(st.alternativas) ? `<li><h3>Alternativas</h3>${parrafos(st.alternativas)}</li>` : ''}
+          <li><h3>Declaración</h3><p>Declaro que el cirujano dentista me explicó, con palabras que entendí, en qué consiste el procedimiento, sus beneficios, sus riesgos y las alternativas que existen, incluida la de no hacerlo; que pude hacer todas las preguntas que quise y me fueron contestadas; que la información que di sobre ${tutor ? 'la salud del paciente' : 'mi salud'}, enfermedades, alergias y medicamentos es verdadera, y que entiendo que en odontología no se pueden garantizar resultados.</p></li>
+          <li><h3>Autorización</h3><p>Por lo anterior, de manera libre y voluntaria, autorizo que se realice el procedimiento descrito, la aplicación de anestesia local y la atención de cualquier complicación que se presente durante el mismo. Sé que puedo retirar esta autorización antes de que inicie el procedimiento.</p></li>
+        </ol>` +
+        firmas([
+          { etiqueta: tutor ? 'Padre, madre o tutor' : 'Paciente', sobre: tutor || pac, detalle: ['Nombre y firma'] },
+          { etiqueta: 'Cirujano dentista', sobre: d.nombre, detalle: ['Nombre, firma y cédula', limpia(d.cedula) ? 'Céd. Prof. ' + limpia(d.cedula) : ''] },
+          { etiqueta: 'Testigo', sobre: st.testigo, detalle: ['Nombre y firma'] }
+        ], 'tres') +
+        '<p class="d-nota">Texto base de referencia. El dentista debe revisarlo y ajustarlo a su práctica.</p>';
+    },
+    privacidad: st => cabDoc({ doctor: doctorPrincipal(), titulo: 'Aviso de privacidad', fecha: fechaLarga(st.fecha) }) +
+      `<div class="d-aviso">${formatoAviso(cfg.aviso)}</div>
+      <section class="d-consent">
+        <h3>Consentimiento</h3>
+        <p class="d-check"><i></i><span>Otorgo mi consentimiento expreso para el tratamiento de mis datos personales sensibles de salud para recibir atención dental.</span></p>
+        <p class="d-check"><i></i><span>Acepto recibir recordatorios y promociones por WhatsApp. <em>(Opcional)</em></span></p>
+        ${firmas([{ etiqueta: 'Nombre y firma del paciente o tutor', sobre: S.pac.nombre }, { etiqueta: 'Fecha', sobre: fechaLarga(st.fecha) }])}
+      </section>
+      <p class="d-nota">Texto base de referencia. Revísalo con tu asesor.</p>`,
+    justificante: st => {
+      const d = doctorDe(st), motivo = limpia(st.motivo) || 'consulta dental', n = parseInt(st.reposo, 10);
+      return cabDoc({ doctor: d, folio: folioTexto('justificante', st), titulo: 'Justificante de asistencia' }) +
+        `<p class="d-texto">Se hace constar que <b>${esc(limpia(S.pac.nombre))}</b> acudió a ${esc(motivo)} a esta clínica el día <b>${fechaLarga(st.fecha)}</b>, de <b>${esc(st.entrada)}</b> a <b>${esc(st.salida)} h</b>.</p>
+        ${n > 0 ? `<p class="d-texto">${n === 1 ? 'Se recomienda <b>1 día</b>' : `Se recomiendan <b>${n} días</b>`} de reposo.</p>` : ''}
+        <p class="d-texto">Se extiende la presente para los fines que al interesado convengan.</p>
+        <p class="d-texto d-texto-lugar">${esc(ciudadDe(cfg.direccion) || limpia(cfg.direccion))}${ciudadDe(cfg.direccion) ? ', a ' : ' '}${fechaLarga(st.fecha)}.</p>
+        <p class="d-acepto" style="margin-top:28pt!important;text-align:center">Atentamente</p>` +
+        firmas([{ etiqueta: 'Firma del Cirujano Dentista', detalle: [d.nombre, d.especialidad, cedulas(d)] }]);
+    }
+  };
+  const COMPACTO = { consentimiento: true, privacidad: true };
+
+  /* ---------- Texto para WhatsApp / copiar ---------- */
+  const TEXTO = {
+    presupuesto: st => {
+      const t = totalesPresupuesto(st, cfg.anticipoPct);
+      const l = [`Hola ${limpia(S.pac.nombre)} 👋 Te comparto tu presupuesto de ${limpia(cfg.clinica)}:`];
+      t.filas.forEach(r => {
+        const piezas = limpia(r.piezas);
+        // "Resina (por pieza)" + piezas 16, 17 -> "Resina (16, 17)"
+        const nombre = piezas ? limpia(r.tratamiento).replace(/\s*\(por [^)]*\)$/i, '') : limpia(r.tratamiento);
+        l.push(`- ${nombre}${piezas ? ` (${piezas})` : ''}${r.cant > 1 ? ` x${r.cant}` : ''} — ${pesos(r.importe)}`);
+      });
+      if (t.descuento > 0) l.push(`Descuento: -${pesos(t.descuento)}`);
+      l.push(`💰 Total: ${pesos(t.total)}`);
+      if (t.anticipo > 0) l.push(`Anticipo para iniciar: ${pesos(t.anticipo)}`);
+      l.push(`Vigente hasta el ${fechaLarga(vigencia(st))}. Cualquier duda, aquí estamos.`);
+      return l.join('\n');
+    },
+    recibo: st => {
+      const s = saldoRecibo(st);
+      const l = [`Hola ${limpia(S.pac.nombre)}, recibimos tu pago de ${pesos2(aNumero(st.cantidad))} por ${minusculaInicial(limpia(st.concepto))}.`];
+      if (s) l.push(s.saldo > 0 ? `Tu saldo pendiente es de ${pesos2(s.saldo)}.` : 'Con este pago tu tratamiento queda liquidado.');
+      l.push('¡Gracias! 🦷');
+      return l.join('\n');
+    },
+    indicaciones: st => {
+      const n = limpia(S.pac.nombre), alarmas = renglones(cfg.alarmas), tel = telefonosClinica();
+      const l = [`Hola${n ? ' ' + n : ''} 👋 Estas son tus indicaciones después de tu ${tituloIndicaciones(st).replace(/^Indicaciones después de tu /, '')}:`, ''];
+      renglones(st.texto).forEach(x => l.push('• ' + x));
+      if (alarmas.length) {
+        l.push('', '🚨 Llámanos de inmediato si:');
+        alarmas.forEach(x => l.push('• ' + x));
+      }
+      if (tel) l.push('', `📞 ${limpia(cfg.clinica)}: ${conPunto(tel.replace(/\.$/, ''))}`);
+      return l.join('\n');
+    }
+  };
+  function ligaWhats(texto, tel) {
+    const d = telefono10(tel);
+    return (d.length === 10 ? `https://wa.me/52${d}` : 'https://wa.me/') + '?text=' + encodeURIComponent(texto);
+  }
+
+  /* ======================= Pantallas ======================= */
+  function pintarCabecera() {
+    const logo = cfg.logo ? `<img src="${esc(cfg.logo)}" alt="">` : SVG_DIENTE;
+    $('#cab-marca').innerHTML = `${logo}<span class="cab-txt"><b>${esc(limpia(cfg.clinica) || 'Mi consultorio')}</b><small>Documentos</small></span>`;
+    $('#btn-config').toggleAttribute('aria-current', actual.p === 'config');
+    if (actual.p === 'config') $('#btn-config').setAttribute('aria-current', 'page');
+  }
+
+  function pintarInicio() {
+    const faltan = cfg.doctores.filter(d => !limpia(d.cedula));
+    const banner = $('#banner-config');
+    banner.hidden = cfg.revisado && !faltan.length;
+    banner.innerHTML = banner.hidden ? '' : `<div class="banner"><p><b>Antes de empezar, completa los datos del consultorio.</b>${
+      faltan.length ? `<span class="detalle">Falta la cédula profesional de: ${faltan.map(d => esc(limpia(d.nombre) || 'un doctor sin nombre')).join(', ')}.</span>` : ''}</p>
+      <a class="btn btn-azul" href="#/config">Completar datos</a></div>`;
+    const curso = $('#paciente-curso');
+    const hay = limpia(S.pac.nombre) || Object.keys(S.docs).length;
+    curso.hidden = !hay;
+    curso.innerHTML = hay ? `<div class="curso"><p>Tienes en pantalla datos de <b>${esc(limpia(S.pac.nombre) || 'un paciente')}</b>. Si vas a atender a otra persona, empieza de nuevo.</p>
+      <button type="button" class="btn btn-linea" data-accion="nuevo"><span aria-hidden="true">🆕</span> Nuevo paciente</button></div>` : '';
+    $('#mosaicos').innerHTML = TIPOS.map(t => `<a class="mosaico" href="#/doc/${t}"><span class="mosaico-ico" aria-hidden="true">${DOCS[t].ico}</span><b>${esc(DOCS[t].corto)}</b><small>${esc(DOCS[t].desc)}</small></a>`).join('');
+  }
+
+  function pintarForm(tipo) {
+    const D = DOCS[tipo];
+    $('#form-titulo').innerHTML = `<span aria-hidden="true">${D.ico}</span> ${esc(D.nombre)}`;
+    $('#form-desc').textContent = D.ayuda;
+    $('#form').innerHTML = FORM[tipo](estado(tipo));
+    $('#form-errores').hidden = true;
+    if (tipo === 'receta') actualizarBuscador();
+  }
+
+  function mostrarErrores(lista) {
+    const caja = $('#form-errores');
+    $$('[aria-invalid]', $('#form')).forEach(el => el.removeAttribute('aria-invalid'));
+    if (!lista.length) { caja.hidden = true; return; }
+    caja.innerHTML = `<b>Falta completar:</b><ul>${lista.map(x => `<li>${esc(x[1])}</li>`).join('')}</ul>`;
+    caja.hidden = false;
+    lista.forEach(([id]) => { const el = document.getElementById(id); if (el) el.setAttribute('aria-invalid', 'true'); });
+    const primero = document.getElementById(lista[0][0]);
+    if (primero) {
+      primero.focus({ preventScroll: true });
+      primero.scrollIntoView({ block: 'center' });
+    }
+  }
+
+  /* Vista previa */
+  function pintarHoja(tipo) {
+    const st = estado(tipo), papel = papelDe(tipo, st), col = colorDoc(), hoja = $('#hoja');
+    hoja.className = `hoja ${papel}${COMPACTO[tipo] ? ' compacto' : ''}`;
+    hoja.style.setProperty('--c', col.c);
+    hoja.style.setProperty('--c-tinte', col.tinte);
+    hoja.innerHTML = `<div class="hoja-in">${DOC[tipo](st)}</div>`;
+    $('#estilo-pagina').textContent = `@page{size:${papel === 'media' ? '5.5in 8.5in' : 'letter'};margin:12mm}`;
+    ajustarEscala();
+  }
+  function pintarVista(tipo) {
+    const st = estado(tipo), D = DOCS[tipo], papel = papelDe(tipo, st);
+    $('#vista-titulo').innerHTML = `<span aria-hidden="true">${D.ico}</span> ${esc(D.nombre)}`;
+    $('#vista-papel').textContent = papel === 'media' ? 'Media carta · 5.5 × 8.5 in' : 'Carta · 8.5 × 11 in';
+    zoom = false;
+    pintarHoja(tipo);
+    const w = $('#acc-whats');
+    w.hidden = !D.whats;
+    $('#acc-copiar').hidden = !D.whats;
+    w.href = D.whats ? ligaWhats(TEXTO[tipo](st), S.pac.telefono) : '#';
+    w.setAttribute('aria-label', telefono10(S.pac.telefono).length === 10 ? 'Mandar por WhatsApp al paciente' : 'Mandar por WhatsApp (eliges el contacto)');
+    const reg = tipo === 'recibo' && esUrl(cfg.formularioCobrosUrl);
+    $('#registro-cobro').hidden = !reg;
+    $('#btn-registro').href = reg ? cfg.formularioCobrosUrl.trim() : '#';
+    ocultarAyuda();
+  }
+  function ajustarEscala() {
+    const marco = $('#vista-marco'), caja = $('#vista-escala'), hoja = $('#hoja');
+    if ($('#p-vista').hidden) return;
+    caja.style.transform = 'none';
+    const w = hoja.offsetWidth, h = hoja.offsetHeight;
+    const disp = marco.clientWidth - 24;
+    const cabe = Math.min(1, disp / w);
+    const s = zoom ? 1 : cabe;
+    caja.style.width = w + 'px';
+    caja.style.transform = s < 1 ? `scale(${s})` : 'none';
+    caja.style.marginLeft = s * w < disp ? `${Math.floor((disp - s * w) / 2)}px` : '0';
+    marco.style.height = `${Math.ceil(h * s) + 24 + (zoom && w > disp ? 14 : 0)}px`;
+    marco.classList.toggle('zoom', zoom);
+    const bz = $('#btn-zoom');
+    bz.hidden = cabe >= 1;
+    bz.innerHTML = zoom ? '<span aria-hidden="true">↔</span> Ajustar a la pantalla' : '<span aria-hidden="true">🔍</span> Ver más grande';
+    revisarHojas();
+  }
+  // Avisa si el contenido ya no cabe en una hoja (la firma se iría a la siguiente página)
+  function revisarHojas() {
+    const tipo = actual.tipo, hi = $('.hoja-in'), caja = $('#aviso-hojas');
+    const ult = hi && hi.lastElementChild;
+    if (!tipo || !ult) { caja.hidden = true; return; }
+    const papel = papelDe(tipo, estado(tipo));
+    const alto = ult.offsetTop + ult.offsetHeight - hi.offsetTop;
+    const pagina = ((papel === 'media' ? 8.5 : 11) - 24 / 25.4) * 96;
+    const pasa = alto > pagina - 4;
+    caja.hidden = !pasa;
+    if (pasa) {
+      caja.innerHTML = '<p><b>Este documento no cabe en una sola hoja</b> y una parte se iría a otra página.</p>' +
+        (PAPEL[tipo] && papel === 'media' && tipo !== 'recibo' && tipo !== 'justificante'
+          ? '<button type="button" class="btn btn-linea" data-accion="a-carta">Cambiar a tamaño carta</button>'
+          : '<p style="margin:0">Acorta el texto con ✏️ Editar.</p>');
+    }
+  }
+
+  function asignarFolio(tipo) {
+    const pref = DOCS[tipo].folio, st = S.docs[tipo];
+    if (!pref || !st || st.folio != null) return false;
+    st.folio = cfg.folios[pref];
+    cfg.folios[pref] = st.folio + 1;
+    guardarYa();
+    return true;
+  }
+  function imprimir() {
+    const tipo = actual.tipo;
+    if (actual.p !== 'vista' || !tipo) return;
+    const nuevo = asignarFolio(tipo);
+    pintarHoja(tipo);
+    const folio = folioTexto(tipo, estado(tipo));
+    // Nombre sugerido del PDF (sin datos del paciente)
+    document.title = `${folio ? folio + ' ' : ''}${DOCS[tipo].corto} - ${limpia(cfg.clinica)}`;
+    if (typeof window.print !== 'function') { toast('Este navegador no deja imprimir. Ábrelo en Chrome o Safari.', 'error'); return; }
+    window.print();
+    if (nuevo) toast(`Folio ${folio} registrado. El siguiente será ${DOCS[tipo].folio}-${String(cfg.folios[DOCS[tipo].folio]).padStart(4, '0')}.`);
+  }
+
+  function ocultarAyuda() {
+    $('#ayuda-pdf').hidden = true;
+    $$('.acc-ayuda').forEach(b => b.setAttribute('aria-expanded', 'false'));
+  }
+
+  async function copiarTexto(texto) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(texto); return true; }
+    } catch (e) { /* se intenta a la antigua */ }
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, texto.length);
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+
+  let tToast;
+  function toast(msg, clase) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.className = 'toast' + (clase ? ' ' + clase : '');
+    t.hidden = false;
+    clearTimeout(tToast);
+    tToast = setTimeout(() => { t.hidden = true; }, 3600);
+  }
+
+  function nuevo() {
+    S.pac = { nombre: '', telefono: '', edad: '' };
+    S.docs = {};
+    $('#hoja').innerHTML = '';
+    $('#form').innerHTML = '';
+    $('#acc-whats').href = '#';
+    ir('/', { reemplazar: true });
+    toast('Listo. Se borraron los datos del paciente.');
+  }
+
+  /* ---------- Receta: medicamentos ---------- */
+  function actualizarBuscador() {
+    const st = estado('receta'), lleno = st.meds.length >= MAX_MEDS;
+    const inp = $('#f-busca'), btn = $('[data-accion="agregar-med"]');
+    if (!inp) return;
+    inp.disabled = lleno;
+    btn.disabled = lleno;
+    $('#meds-ayuda').textContent = lleno
+      ? `Ya tienes ${MAX_MEDS} medicamentos, el máximo por receta.`
+      : `Elige uno de la lista y se agrega solo, o escribe uno nuevo y toca Agregar. Máximo ${MAX_MEDS}.`;
+  }
+  function pintarMeds(foco) {
+    $('#lista-meds').innerHTML = medsHTML(estado('receta'));
+    actualizarBuscador();
+    const el = foco && $(foco);
+    if (el && !el.disabled) el.focus();
+  }
+  function agregarMed(texto) {
+    const st = estado('receta'), n = limpia(texto);
+    if (st.meds.length >= MAX_MEDS) return;
+    if (!n) { toast('Escribe o elige un medicamento.', 'error'); $('#f-busca').focus(); return; }
+    const cat = cfg.medicamentos.find(m => mismoTexto(m[0], n));
+    st.meds.push({ nombre: cat ? cat[0] : n, indicacion: cat ? cat[1] : '' });
+    st.busca = '';
+    $('#f-busca').value = '';
+    $('#f-busca').removeAttribute('aria-invalid');
+    // Si no está en la lista, falta escribir cómo tomarlo
+    pintarMeds(cat ? '#f-busca' : `#med-i-${st.meds.length - 1}`);
+  }
+
+  /* ======================= Configuración ======================= */
+  function cCampo(etq, attrs, o) {
+    o = o || {};
+    const id = 'c-' + Object.values(attrs).join('-').replace(/[^\w-]/g, '-');
+    const data = Object.entries(attrs).map(([k, v]) => `data-${k}="${esc(v)}"`).join(' ');
+    let v;
+    if (attrs.c) { const [a, b] = attrs.c.split('.'); v = b ? cfg[a][b] : cfg[a]; }
+    else { const it = cfg[attrs.cl][+attrs.i]; v = it[/^\d+$/.test(attrs.f) ? +attrs.f : attrs.f]; }
+    const extra = `${o.modo ? ` inputmode="${o.modo}"` : ''}${o.ph ? ` placeholder="${esc(o.ph)}"` : ''}${o.ayuda ? ` aria-describedby="${id}-ayuda"` : ''}`;
+    const control = o.area
+      ? `<textarea id="${id}" class="control" rows="${o.filas || 4}" ${data}${extra}>${esc(v)}</textarea>`
+      : `<input id="${id}" class="control" type="${o.tipo || 'text'}" autocomplete="off" ${data}${extra} value="${esc(v)}">`;
+    return `<div class="campo"><label for="${id}">${etq}${o.opc ? ' <span class="opc">(opcional)</span>' : ''}</label>${control}${o.ayuda ? `<p class="ayuda" id="${id}-ayuda">${o.ayuda}</p>` : ''}</div>`;
+  }
+  const seccion = (id, titulo, cuerpo, abiertos) =>
+    `<details class="sec" data-sec="${id}"${abiertos.has(id) ? ' open' : ''}><summary>${titulo}</summary><div class="sec-cuerpo">${cuerpo}</div></details>`;
+  const subseccion = (id, titulo, cuerpo, abiertos) =>
+    `<details class="subsec" data-sec="${id}"${abiertos.has(id) ? ' open' : ''}><summary><span class="item-tit">${titulo}</span></summary><div class="subsec-cuerpo">${cuerpo}</div></details>`;
+  const botonAgregar = (accion, texto) => `<button type="button" class="btn btn-suave btn-bloque" data-accion="${accion}">＋ ${texto}</button>`;
+
+  function configHTML(ab) {
+    const consultorio = cCampo('Nombre de la clínica', { c: 'clinica' }) +
+      cCampo('Slogan', { c: 'slogan' }, { opc: true }) +
+      cCampo('Dirección', { c: 'direccion' }, { ayuda: 'Calle, número, colonia, ciudad y estado. Sale en el encabezado de todos los documentos.' }) +
+      `<div class="fila-ancha">${cCampo('Teléfono', { c: 'telefono' }, { tipo: 'tel', modo: 'tel' })}${cCampo('WhatsApp', { c: 'whatsapp' }, { tipo: 'tel', modo: 'tel', ayuda: '10 dígitos, sin el 52.' })}</div>` +
+      cCampo('Correo', { c: 'correo' }, { tipo: 'email', modo: 'email' }) +
+      `<div class="campo"><label for="c-color">Color principal</label>
+        <div class="color-fila"><input id="c-color" type="color" data-c="color" value="${esc(cfg.color)}" aria-describedby="c-color-ayuda"><span id="c-color-hex">${esc(cfg.color.toUpperCase())}</span>
+        <button type="button" class="btn btn-linea btn-chico" data-accion="color-defecto">Usar el azul</button></div>
+        <p class="ayuda" id="c-color-ayuda">Se usa en el encabezado y las líneas de los documentos. Si eliges un tono muy claro, se oscurece solo para que se lea impreso.</p></div>
+      <div class="campo"><span class="etiqueta">Logo</span>
+        <div class="logo-fila"><div class="logo-prev">${cfg.logo ? `<img src="${esc(cfg.logo)}" alt="Logo actual">` : '<span>Sin logo</span>'}</div>
+        <div class="logo-btns"><button type="button" class="btn btn-suave" data-accion="subir-logo"><span aria-hidden="true">⬆️</span> ${cfg.logo ? 'Cambiar logo' : 'Subir logo'}</button>${cfg.logo ? '<button type="button" class="btn btn-linea" data-accion="quitar-logo">Quitar logo</button>' : ''}</div></div>
+        <input type="file" id="in-logo" accept="image/*" class="sr-only" tabindex="-1" aria-hidden="true">
+        <p class="ayuda">PNG o JPG. Se ajusta solo a 400 px de ancho.</p></div>`;
+
+    const doctores = cfg.doctores.map((d, i) => `
+      <div class="item" style="margin-bottom:12px">
+        <div class="item-cab"><span class="item-num">${i + 1}</span><span class="item-tit" data-titulo>${esc(limpia(d.nombre) || 'Doctor nuevo')}</span>
+          <span class="item-btns"><button type="button" class="mini mini-x" data-accion="quitar-doctor" data-i="${i}" aria-label="Quitar a ${esc(limpia(d.nombre) || 'este doctor')}"${cfg.doctores.length < 2 ? ' disabled' : ''}>✕</button></span></div>
+        <p class="falta" data-falta${limpia(d.cedula) ? ' hidden' : ''}>⚠ Falta la cédula profesional. Sin ella no se pueden hacer recetas.</p>
+        ${cCampo('Nombre con título', { cl: 'doctores', i, f: 'nombre' }, { ph: 'Ej. C.D. Mariana Ortega López' })}
+        ${cCampo('Especialidad', { cl: 'doctores', i, f: 'especialidad' }, { ph: 'Ej. Cirujana Dentista' })}
+        <div class="fila-ancha">${cCampo('Cédula profesional', { cl: 'doctores', i, f: 'cedula' }, { modo: 'numeric' })}${cCampo('Cédula de especialidad', { cl: 'doctores', i, f: 'cedulaEsp' }, { opc: true, modo: 'numeric' })}</div>
+        ${cCampo('Institución que expidió el título', { cl: 'doctores', i, f: 'institucion' }, { ph: 'Ej. Benemérita Universidad Autónoma de Puebla' })}
+        <label class="check"><input type="radio" name="principal" value="${i}"${d.principal ? ' checked' : ''}><span>Doctor principal <small>(sale primero en los documentos)</small></span></label>
+      </div>`).join('') + botonAgregar('agregar-doctor', 'Agregar doctor');
+
+    const tratamientos = `<div class="tabla-edit"><div class="te-cab" aria-hidden="true"><span>Tratamiento</span><span>Precio ($)</span><span></span></div>${
+      cfg.tratamientos.map((t, i) => `<div class="te-fila">
+        <input class="control" type="text" autocomplete="off" aria-label="Nombre del tratamiento ${i + 1}" data-cl="tratamientos" data-i="${i}" data-f="0" value="${esc(t[0])}">
+        <input class="control" type="text" inputmode="decimal" autocomplete="off" aria-label="Precio del tratamiento ${i + 1}" data-cl="tratamientos" data-i="${i}" data-f="1" data-num="dinero" value="${esc(t[1])}">
+        <button type="button" class="mini mini-x" data-accion="quitar-trat" data-i="${i}" aria-label="Quitar tratamiento ${i + 1}">✕</button></div>`).join('')}</div>` +
+      botonAgregar('agregar-trat', 'Agregar tratamiento');
+
+    const medicamentos = '<p class="nota-gris" style="margin-bottom:14px">Estos son ejemplos. Revisa y ajusta cada medicamento e indicación; la prescripción es responsabilidad del dentista.</p>' +
+      cfg.medicamentos.map((m, i) => `<div class="item" style="margin-bottom:12px">
+        <div class="item-cab"><span class="item-num">${i + 1}</span><span class="item-tit" data-titulo>${esc(limpia(m[0]) || 'Medicamento nuevo')}</span>
+          <span class="item-btns"><button type="button" class="mini mini-x" data-accion="quitar-medcat" data-i="${i}" aria-label="Quitar medicamento ${i + 1}">✕</button></span></div>
+        ${cCampo('Nombre y presentación', { cl: 'medicamentos', i, f: '0' }, { ph: 'Ej. Ibuprofeno 400 mg, tabletas' })}
+        ${cCampo('Indicación sugerida', { cl: 'medicamentos', i, f: '1' }, { area: true, filas: 2 })}</div>`).join('') +
+      botonAgregar('agregar-medcat', 'Agregar medicamento');
+
+    const indicaciones = cCampo('Recuadro “Llámanos de inmediato si…” (sale en todas)', { c: 'alarmas' }, { area: true, filas: 6, ayuda: 'Una señal de alarma por renglón.' }) +
+      '<h3 class="sub3">Plantillas por tratamiento</h3>' +
+      cfg.indicaciones.map((p, i) => subseccion(`ind-${i}`, esc(limpia(p.nombre) || 'Plantilla sin nombre'),
+        cCampo('Nombre del tratamiento', { cl: 'indicaciones', i, f: 'nombre' }, { ayuda: 'Así sale en el título: “Indicaciones después de tu …”.' }) +
+        cCampo('Indicaciones (una por renglón)', { cl: 'indicaciones', i, f: 'texto' }, { area: true, filas: 10 }) +
+        `<button type="button" class="btn btn-peligro btn-chico" data-accion="quitar-ind" data-i="${i}">Quitar esta plantilla</button>`, ab)).join('') +
+      botonAgregar('agregar-ind', 'Agregar plantilla');
+
+    const consentimientos = '<p class="ayuda" style="margin:0 0 12px">Texto base por tratamiento. En cada carta se puede ajustar antes de imprimir.</p>' +
+      cfg.consentimientos.map((p, i) => subseccion(`con-${i}`, esc(limpia(p.nombre) || 'Plantilla sin nombre'),
+        cCampo('Nombre del tratamiento', { cl: 'consentimientos', i, f: 'nombre' }) +
+        cCampo('Procedimiento que se autoriza', { cl: 'consentimientos', i, f: 'procedimiento' }, { area: true, filas: 4 }) +
+        cCampo('Beneficios esperados', { cl: 'consentimientos', i, f: 'beneficios' }, { area: true, filas: 3 }) +
+        cCampo('Riesgos frecuentes', { cl: 'consentimientos', i, f: 'riesgos' }, { area: true, filas: 6 }) +
+        cCampo('Alternativas', { cl: 'consentimientos', i, f: 'alternativas' }, { area: true, filas: 3 }) +
+        `<button type="button" class="btn btn-peligro btn-chico" data-accion="quitar-con" data-i="${i}">Quitar esta plantilla</button>`, ab)).join('') +
+      botonAgregar('agregar-con', 'Agregar plantilla');
+
+    const aviso = '<p class="ayuda" style="margin:0 0 12px">Empieza un renglón con <b>#</b> para un título y con <b>-</b> para una viñeta. Puedes escribir {clinica}, {direccion}, {telefono}, {correo} y {doctor}: se llenan solos con tus datos. Las casillas de consentimiento y las firmas se agregan solas al final.</p>' +
+      cCampo('Texto del aviso', { c: 'aviso' }, { area: true, filas: 18 }) +
+      '<button type="button" class="btn btn-linea btn-chico" data-accion="restaurar-aviso">Restaurar el texto base</button>';
+
+    const cobros = `<div class="fila-ancha">${cCampo('Vigencia del presupuesto (días)', { c: 'vigenciaDias', num: 'entero' }, { modo: 'numeric' })}${cCampo('Anticipo sugerido (%)', { c: 'anticipoPct', num: 'pct' }, { modo: 'decimal' })}</div>` +
+      cCampo('Formas de pago aceptadas', { c: 'formasPago' }, { area: true, filas: 2 }) +
+      cCampo('Leyenda del recibo', { c: 'leyendaRecibo' });
+
+    const folios = '<p class="ayuda" style="margin:0 0 12px">Es el número que llevará el <b>siguiente</b> documento de cada tipo. Sube solo cada vez que imprimes.</p>' +
+      `<div class="fila">${FOLIOS.map(k => cCampo(`${NOMBRE_FOLIO[k]} <span class="opc">(${k})</span>`, { c: 'folios.' + k, num: 'entero' }, { modo: 'numeric' })).join('')}</div>`;
+
+    const formulario = cCampo('Liga del Google Form “Registro de visita y cobro”', { c: 'formularioCobrosUrl' }, { opc: true, tipo: 'url', modo: 'url', ph: 'https://forms.gle/…', ayuda: 'Si pones la liga, en cada recibo aparece el botón “📝 Registrar este cobro en el control”. Si la dejas vacía, no aparece.' }) +
+      `<p class="falta" id="url-aviso"${!limpia(cfg.formularioCobrosUrl) || esUrl(cfg.formularioCobrosUrl) ? ' hidden' : ''}>La liga debe empezar con https://</p>`;
+
+    const respaldo = '<p>Úsalo para pasar tu configuración del celular a la compu, o al revés. El respaldo no incluye datos de pacientes.</p>' +
+      `<div class="btns-fila"><button type="button" class="btn btn-azul" data-accion="descargar-respaldo"><span aria-hidden="true">⬇️</span> Descargar respaldo</button>
+      <button type="button" class="btn btn-linea" data-accion="cargar-respaldo"><span aria-hidden="true">⬆️</span> Cargar respaldo</button></div>
+      <input type="file" id="in-respaldo" class="sr-only" tabindex="-1" aria-hidden="true">
+      <p class="ayuda" id="respaldo-msg" role="status"></p>`;
+
+    return seccion('consultorio', '<span aria-hidden="true">🏥</span> Consultorio', consultorio, ab) +
+      seccion('doctores', '<span aria-hidden="true">🩺</span> Doctores', doctores, ab) +
+      seccion('tratamientos', '<span aria-hidden="true">💲</span> Tratamientos y precios', tratamientos, ab) +
+      seccion('medicamentos', '<span aria-hidden="true">💊</span> Medicamentos frecuentes', medicamentos, ab) +
+      seccion('indicaciones', '<span aria-hidden="true">📋</span> Indicaciones después del tratamiento', indicaciones, ab) +
+      seccion('consentimientos', '<span aria-hidden="true">✍️</span> Consentimientos', consentimientos, ab) +
+      seccion('aviso', '<span aria-hidden="true">🛡️</span> Aviso de privacidad', aviso, ab) +
+      seccion('cobros', '<span aria-hidden="true">🧾</span> Presupuestos y recibos', cobros, ab) +
+      seccion('folios', '<span aria-hidden="true">#️⃣</span> Folios', folios, ab) +
+      seccion('formulario', '<span aria-hidden="true">📝</span> Formulario de cobros', formulario, ab) +
+      seccion('respaldo', '<span aria-hidden="true">💾</span> Respaldo', respaldo, ab) +
+      `<div class="peligro"><h2>Restablecer datos de ejemplo</h2>
+        <p>Borra tu configuración (logo, doctores, precios, textos y folios) y vuelve a cargar los datos de ejemplo.</p>
+        <button type="button" class="btn btn-peligro" data-accion="restablecer">Restablecer datos de ejemplo</button></div>`;
+  }
+
+  function pintarConfig(o) {
+    o = o || {};
+    const cuerpo = $('#config-cuerpo');
+    let abiertos;
+    if (o.entrar) {
+      const faltaCedula = cfg.doctores.some(d => !limpia(d.cedula));
+      abiertos = new Set(!cfg.revisado ? ['consultorio', 'doctores'] : faltaCedula ? ['doctores'] : []);
+      $('#estado-guardado').textContent = almacenOk ? '' : '⚠ Sin guardar';
+    } else {
+      abiertos = new Set($$('details[open]', cuerpo).map(d => d.dataset.sec));
+      if (o.abrir) abiertos.add(o.abrir);
+    }
+    cuerpo.innerHTML = configHTML(abiertos);
+    if (o.foco) {
+      const el = $(o.foco, cuerpo);
+      if (el) { el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center' }); }
+    }
+  }
+
+  function alEditarConfig(e) {
+    const t = e.target;
+    if (t.id === 'in-logo' || t.id === 'in-respaldo') return;
+    if (t.name === 'principal') {
+      if (t.checked) { cfg.doctores.forEach((d, i) => { d.principal = i === +t.value; }); programarGuardado(); }
+      return;
+    }
+    const c = t.dataset.c, cl = t.dataset.cl;
+    if (!c && !cl) return;
+    let v = t.value;
+    const tipoNum = t.dataset.num;
+    if (tipoNum === 'entero') v = Math.max(1, Math.floor(aNumero(v)) || 1);
+    else if (tipoNum === 'pct') v = Math.min(100, aNumero(v));
+    else if (tipoNum === 'dinero') v = redondea(aNumero(v));
+    if (c) {
+      const [a, b] = c.split('.');
+      if (b) cfg[a][b] = v; else cfg[a] = v;
+    } else {
+      const item = cfg[cl][+t.dataset.i];
+      if (!item) return;
+      item[/^\d+$/.test(t.dataset.f) ? +t.dataset.f : t.dataset.f] = v;
+    }
+    // Al salir del campo, los números se muestran ya corregidos
+    if (tipoNum && e.type === 'change') t.value = v;
+    if (c === 'clinica') pintarCabecera();
+    if (c === 'color') $('#c-color-hex').textContent = String(v).toUpperCase();
+    if (c === 'formularioCobrosUrl') $('#url-aviso').hidden = !limpia(v) || esUrl(v);
+    if (cl && (t.dataset.f === 'nombre' || (cl === 'medicamentos' && t.dataset.f === '0'))) {
+      const caja = t.closest('.item, .subsec');
+      const tit = caja && $('[data-titulo], summary .item-tit', caja);
+      if (tit) tit.textContent = limpia(v) || 'Sin nombre';
+    }
+    if (cl === 'doctores' && t.dataset.f === 'cedula') {
+      const f = $('[data-falta]', t.closest('.item'));
+      if (f) f.hidden = !!limpia(v);
+    }
+    programarGuardado();
+  }
+
+  function procesarLogo(archivo) {
+    if (!archivo) return;
+    if (!/^image\//.test(archivo.type)) { toast('Ese archivo no es una imagen.', 'error'); return; }
+    const lector = new FileReader();
+    lector.onerror = () => toast('No pude leer esa imagen. Prueba con un PNG o JPG.', 'error');
+    lector.onload = () => {
+      const img = new Image();
+      img.onerror = lector.onerror;
+      img.onload = () => {
+        const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+        if (!w || !h) { lector.onerror(); return; }
+        const s = Math.min(1, 400 / w, 400 / h);
+        const cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(w * s));
+        cv.height = Math.max(1, Math.round(h * s));
+        const ctx = cv.getContext('2d');
+        const jpg = archivo.type === 'image/jpeg';
+        if (jpg) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); }
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, cv.width, cv.height);
+        let url;
+        try { url = cv.toDataURL(jpg ? 'image/jpeg' : 'image/png', 0.9); } catch (e) { lector.onerror(); return; }
+        const antes = cfg.logo;
+        cfg.logo = url;
+        if (!guardarYa() && probarAlmacen()) {
+          cfg.logo = antes;
+          guardarYa();
+          toast('El logo pesa demasiado para guardarlo. Prueba con una imagen más sencilla.', 'error');
+        } else toast('Logo listo ✅');
+        pintarConfig();
+        pintarCabecera();
+      };
+      img.src = lector.result;
+    };
+    lector.readAsDataURL(archivo);
+  }
+
+  function descargarRespaldo() {
+    const datos = { app: APP_ID, version: 1, creado: new Date().toISOString(), config: cfg };
+    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `respaldo-documentos-${slug(cfg.clinica)}-${hoyISO()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    $('#respaldo-msg').textContent = `Se descargó ${a.download}. Guárdalo en un lugar seguro.`;
+  }
+  function cargarRespaldo(archivo) {
+    if (!archivo) return;
+    const msg = $('#respaldo-msg');
+    const lector = new FileReader();
+    lector.onerror = () => { msg.textContent = 'No se pudo leer el archivo.'; };
+    lector.onload = () => {
+      let obj;
+      try { obj = JSON.parse(lector.result); } catch (e) {
+        msg.textContent = 'Ese archivo no es un respaldo de este generador. No se cambió nada.';
+        toast('Archivo no válido', 'error');
+        return;
+      }
+      const r = validarRespaldo(obj);
+      if (r.error) { msg.textContent = r.error; toast('Archivo no válido', 'error'); return; }
+      if (!window.confirm(`¿Reemplazar tu configuración con el respaldo de “${limpia(r.config.clinica) || 'consultorio'}”?\n\nLo que tienes ahora en Configuración se perderá.`)) return;
+      cfg = r.config;
+      guardarYa();
+      pintarConfig();
+      pintarCabecera();
+      $('#respaldo-msg').textContent = 'Respaldo cargado. Ya tienes tu configuración.';
+      toast('Respaldo cargado ✅');
+    };
+    lector.readAsText(archivo);
+  }
+
+  /* ======================= Pruebas internas (#/pruebas) ======================= */
+  const PRUEBAS_LETRAS = [
+    [1, 'Un peso 00/100 M.N.'],
+    [15, 'Quince pesos 00/100 M.N.'],
+    [21, 'Veintiún pesos 00/100 M.N.'],
+    [100, 'Cien pesos 00/100 M.N.'],
+    [101, 'Ciento un pesos 00/100 M.N.'],
+    [1000, 'Mil pesos 00/100 M.N.'],
+    [1500, 'Mil quinientos pesos 00/100 M.N.'],
+    [2021.50, 'Dos mil veintiún pesos 50/100 M.N.'],
+    [1000000, 'Un millón de pesos 00/100 M.N.'],
+    // Extras
+    [0.5, 'Cero pesos 50/100 M.N.'],
+    [16, 'Dieciséis pesos 00/100 M.N.'],
+    [31, 'Treinta y un pesos 00/100 M.N.'],
+    [21000, 'Veintiún mil pesos 00/100 M.N.'],
+    [101000, 'Ciento un mil pesos 00/100 M.N.'],
+    [2000000, 'Dos millones de pesos 00/100 M.N.'],
+    [1234567.89, 'Un millón doscientos treinta y cuatro mil quinientos sesenta y siete pesos 89/100 M.N.']
+  ];
+  const PRUEBAS_TOTALES = [
+    { nombre: 'Descuento en $', filas: [['Resina', '2', '800'], ['Limpieza dental', '1', '600']], tipo: 'monto', desc: '200', esp: [2200, 200, 2000, 600] },
+    { nombre: 'Descuento en %', filas: [['Resina', '2', '800'], ['Limpieza dental', '1', '600']], tipo: 'pct', desc: '10', esp: [2200, 220, 1980, 594] },
+    { nombre: 'Descuento en $ mayor al subtotal', filas: [['Limpieza dental', '1', '600']], tipo: 'monto', desc: '5000', esp: [600, 600, 0, 0] },
+    { nombre: 'Sin descuento, con centavos', filas: [['Endodoncia', '1', '3500.50']], tipo: 'pct', desc: '', esp: [3500.5, 0, 3500.5, 1050.15] },
+    { nombre: 'Renglón vacío se ignora', filas: [['Corona', '1', '5,500'], ['', '1', '999']], tipo: 'pct', desc: '15', esp: [5500, 825, 4675, 1402.5] }
+  ];
+  function correrPruebas() {
+    const letras = PRUEBAS_LETRAS.map(([n, esp]) => { const r = numeroALetras(n); return { n, esp, r, ok: r === esp }; });
+    const totales = PRUEBAS_TOTALES.map(p => {
+      const t = totalesPresupuesto({ renglones: p.filas.map(([tratamiento, cantidad, precio]) => ({ tratamiento, piezas: '', cantidad, precio })), tipoDesc: p.tipo, descuento: p.desc }, 30);
+      const r = [t.subtotal, t.descuento, t.total, t.anticipo];
+      return { nombre: p.nombre, esp: p.esp, r, ok: r.every((x, i) => x === p.esp[i]) };
+    });
+    const ida = JSON.stringify(cfg), vuelta = JSON.stringify(validarRespaldo(JSON.parse(JSON.stringify({ app: APP_ID, config: cfg }))).config);
+    return { letras, totales, respaldo: ida === vuelta };
+  }
+  function pintarPruebas() {
+    const r = correrPruebas();
+    const marca = ok => (ok ? '✅' : '❌');
+    $('#pruebas-cuerpo').innerHTML = `
+      <h2 class="sub">Número a letra</h2>
+      <table class="pruebas"><thead><tr><th></th><th>Cantidad</th><th>Esperado</th><th>Resultado</th></tr></thead><tbody>${
+        r.letras.map(x => `<tr><td>${marca(x.ok)}</td><td>${x.n}</td><td>${esc(x.esp)}</td><td>${esc(x.r)}</td></tr>`).join('')}</tbody></table>
+      <h2 class="sub">Totales del presupuesto (anticipo 30%)</h2>
+      <table class="pruebas"><thead><tr><th></th><th>Caso</th><th>Esperado: subtotal / descuento / total / anticipo</th><th>Resultado</th></tr></thead><tbody>${
+        r.totales.map(x => `<tr><td>${marca(x.ok)}</td><td>${esc(x.nombre)}</td><td>${x.esp.join(' / ')}</td><td>${x.r.join(' / ')}</td></tr>`).join('')}</tbody></table>
+      <h2 class="sub">Respaldo</h2>
+      <p>${marca(r.respaldo)} Descargar y volver a cargar el respaldo deja la configuración igual.</p>`;
+  }
+
+  /* ======================= Navegación ======================= */
+  const pila = [];
+  let reemplazando = false;
+  let rutaMem = null; // si el navegador no deja cambiar el # (algunos visores abren el archivo así), la ruta vive en memoria
+  const rutaHash = () => location.hash.replace(/^#/, '') || '/';
+  const rutaActual = () => (rutaMem != null ? rutaMem : rutaHash());
+  function ir(ruta, o) {
+    const reemplazar = !!(o && o.reemplazar);
+    if (rutaActual() === ruta) { render(); return; }
+    if (rutaMem == null) {
+      reemplazando = reemplazar;
+      try {
+        if (reemplazar) location.replace('#' + ruta); else location.hash = ruta;
+      } catch (e) { /* navegación bloqueada */ }
+      if (rutaHash() === ruta) return; // el evento hashchange pinta la pantalla
+      reemplazando = false;
+    }
+    if (reemplazar) pila[Math.max(0, pila.length - 1)] = ruta; else pila.push(ruta);
+    rutaMem = ruta;
+    render();
+  }
+  // Regresa con el botón "atrás" del navegador si la pantalla anterior es esa; si no, la reemplaza
+  function regresarA(ruta) {
+    const anterior = pila.length >= 2 && pila[pila.length - 2] === ruta;
+    if (anterior && rutaMem == null) history.back();
+    else if (anterior) { pila.pop(); rutaMem = ruta; render(); }
+    else ir(ruta, { reemplazar: true });
+  }
+  const volver = () => (pila.length >= 2 ? regresarA(pila[pila.length - 2]) : ir('/', { reemplazar: true }));
+  window.addEventListener('hashchange', () => {
+    const r = rutaActual();
+    if (reemplazando) { pila[Math.max(0, pila.length - 1)] = r; reemplazando = false; }
+    else if (pila.length >= 2 && pila[pila.length - 2] === r) pila.pop();
+    else pila.push(r);
+    render();
+  });
+
+  function render() {
+    const r = rutaActual();
+    const m = /^\/doc\/(\w+)(\/ver)?$/.exec(r);
+    if (r === '/config') return mostrar('config');
+    if (r === '/pruebas') return mostrar('pruebas');
+    if (m && DOCS[m[1]]) {
+      const tipo = m[1];
+      if (m[2]) {
+        if (S.docs[tipo] && !VALIDAR[tipo](S.docs[tipo]).length) return mostrar('vista', tipo);
+        ir(`/doc/${tipo}`, { reemplazar: true });
+        return;
+      }
+      return mostrar('form', tipo);
+    }
+    mostrar('inicio');
+  }
+  function mostrar(p, tipo) {
+    if (actual.p === 'config' && p !== 'config' && tGuardar) guardarYa();
+    actual = { p, tipo: tipo || null };
+    ['inicio', 'form', 'vista', 'config', 'pruebas'].forEach(k => { $('#p-' + k).hidden = k !== p; });
+    $('#acciones').hidden = p !== 'vista';
+    document.body.classList.toggle('con-acciones', p === 'vista');
+    ajustarRelleno();
+    if (p === 'inicio') pintarInicio();
+    else if (p === 'form') pintarForm(tipo);
+    else if (p === 'vista') pintarVista(tipo);
+    else if (p === 'config') pintarConfig({ entrar: true });
+    else if (p === 'pruebas') pintarPruebas();
+    pintarCabecera();
+    document.title = `${tipo ? DOCS[tipo].corto + ' · ' : p === 'config' ? 'Configuración · ' : ''}Documentos · ${limpia(cfg.clinica)}`;
+    window.scrollTo(0, 0);
+    const h = $(`#p-${p} h1`);
+    if (h) h.focus({ preventScroll: true });
+  }
+
+  /* ======================= Eventos ======================= */
+  function alEscribir(e) {
+    const t = e.target, b = t.dataset.b, tipo = actual.tipo;
+    if (!b || !tipo || (t.type === 'radio' && !t.checked)) return;
+    const st = estado(tipo);
+    if (t.dataset.l) {
+      const it = st[t.dataset.l][+t.dataset.i];
+      if (!it) return;
+      it[b] = t.value;
+    } else if (b.startsWith('pac.')) S.pac[b.slice(4)] = t.value;
+    else st[b] = t.value;
+    t.removeAttribute('aria-invalid');
+    if (REACCION[tipo]) REACCION[tipo](st, b, t, e);
+  }
+  $('#form').addEventListener('input', alEscribir);
+  $('#form').addEventListener('change', alEscribir);
+  $('#form').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.id === 'f-busca') { e.preventDefault(); agregarMed(e.target.value); }
+  });
+
+  $('#p-config').addEventListener('input', alEditarConfig);
+  $('#p-config').addEventListener('change', e => {
+    if (e.target.id === 'in-logo') { procesarLogo(e.target.files[0]); e.target.value = ''; return; }
+    if (e.target.id === 'in-respaldo') { cargarRespaldo(e.target.files[0]); e.target.value = ''; return; }
+    alEditarConfig(e);
+  });
+
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-accion]');
+    if (!b) {
+      // Ligas internas (#/...) pasan por ir() para que también funcionen con la ruta en memoria
+      const liga = e.target.closest('a[href^="#/"]');
+      if (liga && !e.ctrlKey && !e.metaKey && !e.shiftKey) { e.preventDefault(); ir(liga.getAttribute('href').slice(1)); }
+      return;
+    }
+    const a = b.dataset.accion, i = +b.dataset.i;
+    if (b.tagName === 'A') e.preventDefault();
+    const st = actual.tipo ? estado(actual.tipo) : null;
+    switch (a) {
+      case 'inicio': regresarA('/'); break;
+      case 'ver': {
+        const errores = VALIDAR[actual.tipo](st);
+        mostrarErrores(errores);
+        if (!errores.length) ir(`/doc/${actual.tipo}/ver`);
+        break;
+      }
+      case 'imprimir': imprimir(); break;
+      case 'ayuda-pdf': {
+        const caja = $('#ayuda-pdf');
+        caja.hidden = !caja.hidden;
+        $$('.acc-ayuda').forEach(x => x.setAttribute('aria-expanded', String(!caja.hidden)));
+        break;
+      }
+      case 'copiar':
+        copiarTexto(TEXTO[actual.tipo](st)).then(ok => toast(ok ? 'Texto copiado. Pégalo donde quieras.' : 'No se pudo copiar en este navegador.', ok ? '' : 'error'));
+        break;
+      case 'editar': regresarA(`/doc/${actual.tipo}`); break;
+      case 'nuevo': nuevo(); break;
+      case 'zoom': zoom = !zoom; ajustarEscala(); break;
+      case 'a-carta':
+        st.papel = 'carta';
+        if (actual.tipo === 'receta') cfg.papelReceta = 'carta'; else cfg.papelIndicaciones = 'carta';
+        guardarYa();
+        pintarVista(actual.tipo);
+        break;
+
+      // Receta
+      case 'agregar-med': agregarMed($('#f-busca').value); break;
+      case 'quitar-med': st.meds.splice(i, 1); pintarMeds(st.meds.length ? `#med-n-${Math.min(i, st.meds.length - 1)}` : '#f-busca'); break;
+      case 'subir-med': case 'bajar-med': {
+        const j = a === 'subir-med' ? i - 1 : i + 1;
+        if (j < 0 || j >= st.meds.length) break;
+        [st.meds[i], st.meds[j]] = [st.meds[j], st.meds[i]];
+        pintarMeds(`[data-accion="${a}"][data-i="${j}"]`);
+        if (document.activeElement === document.body) { const el = $(`#med-n-${j}`); if (el) el.focus(); }
+        break;
+      }
+      // Presupuesto
+      case 'agregar-renglon':
+        st.renglones.push(renglonVacio());
+        $('#lista-renglones').innerHTML = renglonesHTML(st);
+        $(`#ren-t-${st.renglones.length - 1}`).focus();
+        break;
+      case 'quitar-renglon':
+        st.renglones.splice(i, 1);
+        if (!st.renglones.length) st.renglones.push(renglonVacio());
+        $('#lista-renglones').innerHTML = renglonesHTML(st);
+        $('#vivo').innerHTML = vivoPresupuesto(st);
+        $(`#ren-t-${Math.min(i, st.renglones.length - 1)}`).focus();
+        break;
+
+      // Configuración
+      case 'cerrar-config':
+        cfg.revisado = true;
+        guardarYa();
+        volver();
+        break;
+      case 'color-defecto': cfg.color = DEFAULTS.color; guardarYa(); pintarConfig(); break;
+      case 'subir-logo': $('#in-logo').click(); break;
+      case 'quitar-logo': cfg.logo = ''; guardarYa(); pintarConfig(); pintarCabecera(); break;
+      case 'agregar-doctor':
+        cfg.doctores.push({ nombre: '', especialidad: '', cedula: '', cedulaEsp: '', institucion: '', principal: false });
+        guardarYa();
+        pintarConfig({ abrir: 'doctores', foco: `#c-doctores-${cfg.doctores.length - 1}-nombre` });
+        break;
+      case 'quitar-doctor': {
+        if (cfg.doctores.length < 2) break;
+        const d = cfg.doctores[i];
+        if (!window.confirm(`¿Quitar a ${limpia(d.nombre) || 'este doctor'} de la lista?`)) break;
+        cfg.doctores.splice(i, 1);
+        if (!cfg.doctores.some(x => x.principal)) cfg.doctores[0].principal = true;
+        guardarYa();
+        pintarConfig();
+        break;
+      }
+      case 'agregar-trat':
+        cfg.tratamientos.push(['', 0]);
+        guardarYa();
+        pintarConfig({ abrir: 'tratamientos', foco: `#c-tratamientos-${cfg.tratamientos.length - 1}-0` });
+        break;
+      case 'quitar-trat': cfg.tratamientos.splice(i, 1); guardarYa(); pintarConfig(); break;
+      case 'agregar-medcat':
+        cfg.medicamentos.push(['', '']);
+        guardarYa();
+        pintarConfig({ abrir: 'medicamentos', foco: `#c-medicamentos-${cfg.medicamentos.length - 1}-0` });
+        break;
+      case 'quitar-medcat': cfg.medicamentos.splice(i, 1); guardarYa(); pintarConfig(); break;
+      case 'agregar-ind':
+        cfg.indicaciones.push({ nombre: '', texto: '' });
+        guardarYa();
+        pintarConfig({ abrir: `ind-${cfg.indicaciones.length - 1}`, foco: `#c-indicaciones-${cfg.indicaciones.length - 1}-nombre` });
+        break;
+      case 'quitar-ind':
+        if (!window.confirm(`¿Quitar la plantilla “${limpia(cfg.indicaciones[i].nombre) || 'sin nombre'}”?`)) break;
+        cfg.indicaciones.splice(i, 1); guardarYa(); pintarConfig(); break;
+      case 'agregar-con':
+        cfg.consentimientos.push({ nombre: '', procedimiento: '', beneficios: '', riesgos: '', alternativas: '' });
+        guardarYa();
+        pintarConfig({ abrir: `con-${cfg.consentimientos.length - 1}`, foco: `#c-consentimientos-${cfg.consentimientos.length - 1}-nombre` });
+        break;
+      case 'quitar-con':
+        if (!window.confirm(`¿Quitar la plantilla “${limpia(cfg.consentimientos[i].nombre) || 'sin nombre'}”?`)) break;
+        cfg.consentimientos.splice(i, 1); guardarYa(); pintarConfig(); break;
+      case 'restaurar-aviso':
+        if (!window.confirm('¿Cambiar el texto del aviso por el texto base? Se perderán tus cambios a este texto.')) break;
+        cfg.aviso = DEFAULTS.aviso; guardarYa(); pintarConfig(); break;
+      case 'descargar-respaldo': descargarRespaldo(); break;
+      case 'cargar-respaldo': $('#in-respaldo').click(); break;
+      case 'restablecer':
+        if (!window.confirm('¿Restablecer los datos de ejemplo?\n\nSe borrará tu configuración: logo, doctores, precios, textos y folios. Si la quieres conservar, primero descarga un respaldo.')) break;
+        cfg = normalizar(DEFAULTS);
+        guardarYa();
+        pintarConfig({ entrar: true });
+        pintarCabecera();
+        toast('Se cargaron los datos de ejemplo.');
+        break;
+    }
+  });
+
+  // Ctrl+P / Cmd+P desde la vista previa también cuenta como impresión
+  window.addEventListener('beforeprint', () => {
+    if (actual.p === 'vista' && asignarFolio(actual.tipo)) pintarHoja(actual.tipo);
+  });
+  // Que la barra de acciones nunca tape el final de la página
+  const ajustarRelleno = () => { document.body.style.paddingBottom = actual.p === 'vista' ? `${$('#acciones').offsetHeight + 16}px` : ''; };
+  window.addEventListener('resize', () => { if (actual.p === 'vista') { ajustarEscala(); ajustarRelleno(); } });
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(() => { if (actual.p === 'vista') ajustarEscala(); }).observe($('#hoja'));
+    new ResizeObserver(ajustarRelleno).observe($('#acciones'));
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#ayuda-pdf').hidden) ocultarAyuda(); });
+  // Si cierran la pestaña con un cambio pendiente, se guarda antes
+  window.addEventListener('pagehide', () => { if (tGuardar) guardarYa(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && tGuardar) guardarYa(); });
+
+  /* ---------- Arranque ---------- */
+  cargarConfig();
+  $('#aviso-almacen').hidden = almacenOk;
+  pila.push(rutaActual());
+  render();
+  if (window.console && console.assert) {
+    const r = correrPruebas();
+    r.letras.concat(r.totales).forEach(x => console.assert(x.ok, 'Prueba fallida', x));
+  }
+})();
+</script>
+</body>
+</html>
