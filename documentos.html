@@ -188,6 +188,13 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
 .errores ul{margin:6px 0 0;padding-left:20px}
 .btn-ver{margin-top:16px}
 
+/* Botón y aviso de "archivo de ejemplo" (solo con MODO_DEMO) */
+.ejemplo-caja{margin:0 0 18px;padding:14px;border:2px dashed var(--aqua);border-radius:var(--radio);background:var(--aqua-suave)}
+.ejemplo-caja .ayuda{margin-top:8px;text-align:center;color:var(--azul)}
+.btn-ejemplo{background:var(--aqua);color:var(--azul);font-weight:800;box-shadow:0 6px 16px rgba(46,196,182,.4)}
+.btn-ejemplo:hover{background:#25B3A6}
+.ejemplo-aviso{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px;padding:12px 14px;border:1px solid #BFE9E4;border-radius:14px;background:var(--aqua-suave);color:var(--azul);font-size:.9375rem}
+
 /* Vista previa */
 .vista-herr{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
 .chip-papel{display:inline-flex;align-items:center;min-height:36px;padding:6px 12px;border:1px solid var(--borde);border-radius:999px;background:#fff;color:var(--azul);font-size:.875rem;font-weight:700}
@@ -447,6 +454,10 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
       <div class="pantalla-cab"><a class="btn btn-linea btn-chico" href="#/" data-accion="inicio"><span aria-hidden="true">←</span> Inicio</a></div>
       <h1 class="titulo" id="form-titulo" tabindex="-1"></h1>
       <p class="lead" id="form-desc"></p>
+      <div class="ejemplo-caja" id="ejemplo-caja" hidden>
+        <button type="button" class="btn btn-ejemplo btn-grande btn-bloque" data-accion="ejemplo"><span aria-hidden="true">👀</span> Ver archivo de ejemplo</button>
+        <p class="ayuda">Se llena solo con datos ficticios para que veas cómo queda. O llena tú los datos aquí abajo.</p>
+      </div>
       <div class="tarjeta form-card" id="form"></div>
       <div class="errores" id="form-errores" role="alert" hidden></div>
       <button type="button" class="btn btn-azul btn-grande btn-bloque btn-ver" data-accion="ver">Ver documento <span aria-hidden="true">→</span></button>
@@ -457,6 +468,7 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
     <div class="envoltura app-ui">
       <h1 class="titulo" id="vista-titulo" tabindex="-1"></h1>
       <p class="lead">Así se va a ver impreso. Revísalo antes de imprimir o mandar.</p>
+      <p class="ejemplo-aviso" id="ejemplo-aviso" hidden><span aria-hidden="true">🧪</span> <span><b>Este es un ejemplo con datos ficticios.</b> Toca ✏️ Editar para cambiar los datos y probar con los tuyos, o 🆕 Nuevo para empezar en blanco.</span></p>
       <div class="alerta" id="aviso-hojas" role="status" hidden></div>
       <div class="registro" id="registro-cobro" hidden>
         <p>¿Ya lo anotaste en el control de cobros?</p>
@@ -676,6 +688,10 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
     papelIndicaciones: "carta",
     revisado: false
   };
+
+  // SOLO DEMO: muestra el botón "Ver archivo de ejemplo" en cada documento.
+  // En la versión de un cliente real pon false.
+  const MODO_DEMO = true;
 
   /* ======================= De aquí para abajo no hace falta tocar nada ======================= */
   const CLAVE = 'nacar_docs_config_v1';
@@ -905,7 +921,7 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
   }
 
   /* ---------- Datos de la sesión (en memoria; se borran con "Nuevo" o al cerrar) ---------- */
-  const S = { pac: { nombre: '', telefono: '', edad: '' }, docs: {} };
+  const S = { pac: { nombre: '', telefono: '', edad: '' }, docs: {}, ejemplo: {} };
   let actual = { p: 'inicio', tipo: null };
   let zoom = false;
 
@@ -946,6 +962,48 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
   function estado(tipo) {
     if (!S.docs[tipo]) S.docs[tipo] = Object.assign(NUEVO[tipo](), { folio: null });
     return S.docs[tipo];
+  }
+
+  /* ---------- Archivo de ejemplo (MODO_DEMO): datos ficticios para ver cada documento lleno ---------- */
+  const PAC_EJEMPLO = { nombre: 'Ana Torres Ruiz', telefono: '2225550101', edad: '34' };
+  // Busca en tu catálogo actual; si ya no existe, usa el de ejemplo
+  function medEjemplo(nombre) {
+    const m = cfg.medicamentos.find(x => mismoTexto(x[0], nombre)) || DEFAULTS.medicamentos.find(x => x[0] === nombre) || [nombre, ''];
+    return { nombre: m[0], indicacion: m[1] };
+  }
+  function renglonEjemplo(nombre, piezas, cantidad) {
+    const t = cfg.tratamientos.find(x => mismoTexto(x[0], nombre)) || DEFAULTS.tratamientos.find(x => x[0] === nombre) || [nombre, 0];
+    return { tratamiento: t[0], piezas, cantidad: String(cantidad), precio: String(t[1]) };
+  }
+  const idxPlantilla = (lista, nombre) => Math.max(0, lista.findIndex(p => mismoTexto(p.nombre, nombre)));
+  const EJEMPLO = {
+    receta: () => ({ peso: '62', alergias: 'Penicilina',
+      meds: [medEjemplo('Ibuprofeno 400 mg, tabletas'), medEjemplo('Clindamicina 300 mg, cápsulas'), medEjemplo('Clorhexidina 0.12%, enjuague bucal')],
+      generales: 'Dieta blanda y tibia las primeras 24 horas.\nRegresar a revisión en 7 días.' }),
+    presupuesto: () => ({ renglones: [
+        renglonEjemplo('Limpieza dental', '', 1), renglonEjemplo('Resina (por pieza)', '16, 17', 2),
+        renglonEjemplo('Endodoncia', '36', 1), renglonEjemplo('Corona de porcelana', '36', 1)],
+      tipoDesc: 'pct', descuento: '10', notas: 'El tratamiento se hará en 4 citas. La corona se coloca unas 2 semanas después de la endodoncia.' }),
+    recibo: () => ({ concepto: 'Corona de porcelana', cantidad: '2750', forma: 'Transferencia', total: '5500', anteriores: '' }),
+    indicaciones: () => {
+      const i = idxPlantilla(cfg.indicaciones, 'Extracción');
+      return { plantilla: String(i), texto: cfg.indicaciones[i] ? cfg.indicaciones[i].texto : '' };
+    },
+    consentimiento: () => {
+      const i = idxPlantilla(cfg.consentimientos, 'Extracción');
+      return Object.assign({ plantilla: String(i), testigo: 'Luis Hernández Cruz', piezas: '38 y 48' }, textosConsent(i));
+    },
+    privacidad: () => ({}),
+    justificante: () => ({ entrada: '10:00', salida: '11:15', motivo: 'consulta dental', reposo: '1' })
+  };
+  function verEjemplo(tipo) {
+    const propio = limpia(S.pac.nombre) && !S.pacEjemplo;
+    if (propio && !window.confirm('Se van a reemplazar los datos que escribiste por datos de ejemplo. ¿Continuar?')) return;
+    S.pac = Object.assign({}, PAC_EJEMPLO);
+    S.pacEjemplo = true;
+    S.docs[tipo] = Object.assign(NUEVO[tipo](), EJEMPLO[tipo](), { folio: null });
+    S.ejemplo[tipo] = true;
+    ir(`/doc/${tipo}/ver`);
   }
   function folioTexto(tipo, st) {
     const pref = DOCS[tipo].folio;
@@ -1508,6 +1566,7 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
     $('#form-desc').textContent = D.ayuda;
     $('#form').innerHTML = FORM[tipo](estado(tipo));
     $('#form-errores').hidden = true;
+    $('#ejemplo-caja').hidden = !MODO_DEMO;
     if (tipo === 'receta') actualizarBuscador();
   }
 
@@ -1546,6 +1605,7 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
     $('#acc-copiar').hidden = !D.whats;
     w.href = D.whats ? ligaWhats(TEXTO[tipo](st), S.pac.telefono) : '#';
     w.setAttribute('aria-label', telefono10(S.pac.telefono).length === 10 ? 'Mandar por WhatsApp al paciente' : 'Mandar por WhatsApp (eliges el contacto)');
+    $('#ejemplo-aviso').hidden = !S.ejemplo[tipo];
     const reg = tipo === 'recibo' && esUrl(cfg.formularioCobrosUrl);
     $('#registro-cobro').hidden = !reg;
     $('#btn-registro').href = reg ? cfg.formularioCobrosUrl.trim() : '#';
@@ -1589,7 +1649,7 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
 
   function asignarFolio(tipo) {
     const pref = DOCS[tipo].folio, st = S.docs[tipo];
-    if (!pref || !st || st.folio != null) return false;
+    if (!pref || !st || st.folio != null || S.ejemplo[tipo]) return false; // el ejemplo no gasta folios
     st.folio = cfg.folios[pref];
     cfg.folios[pref] = st.folio + 1;
     guardarYa();
@@ -1643,6 +1703,8 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
   function nuevo() {
     S.pac = { nombre: '', telefono: '', edad: '' };
     S.docs = {};
+    S.ejemplo = {};
+    S.pacEjemplo = false;
     $('#hoja').innerHTML = '';
     $('#form').innerHTML = '';
     $('#acc-whats').href = '#';
@@ -2062,8 +2124,9 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
       const it = st[t.dataset.l][+t.dataset.i];
       if (!it) return;
       it[b] = t.value;
-    } else if (b.startsWith('pac.')) S.pac[b.slice(4)] = t.value;
+    } else if (b.startsWith('pac.')) { S.pac[b.slice(4)] = t.value; S.pacEjemplo = false; }
     else st[b] = t.value;
+    delete S.ejemplo[tipo]; // ya lo están cambiando: deja de ser el ejemplo
     t.removeAttribute('aria-invalid');
     if (REACCION[tipo]) REACCION[tipo](st, b, t, e);
   }
@@ -2100,6 +2163,7 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
         break;
       }
       case 'imprimir': imprimir(); break;
+      case 'ejemplo': verEjemplo(actual.tipo); break;
       case 'ayuda-pdf': {
         const caja = $('#ayuda-pdf');
         caja.hidden = !caja.hidden;
