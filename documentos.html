@@ -468,6 +468,7 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
     <div class="envoltura app-ui">
       <h1 class="titulo" id="vista-titulo" tabindex="-1"></h1>
       <p class="lead">Así se va a ver impreso. Revísalo antes de imprimir o mandar.</p>
+      <div class="alerta" id="aviso-navegador" role="status" hidden></div>
       <p class="ejemplo-aviso" id="ejemplo-aviso" hidden><span aria-hidden="true">🧪</span> <span><b>Este es un ejemplo con datos ficticios.</b> Toca ✏️ Editar para cambiar los datos y probar con los tuyos, o 🆕 Nuevo para empezar en blanco.</span></p>
       <div class="alerta" id="aviso-hojas" role="status" hidden></div>
       <div class="registro" id="registro-cobro" hidden>
@@ -513,7 +514,7 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
       <div class="ayuda-pdf-cab"><b>¿Cómo guardo el PDF?</b><button type="button" class="btn-x" data-accion="ayuda-pdf" aria-label="Cerrar ayuda">×</button></div>
       <ul>
         <li><b>Android (Chrome):</b> toca Imprimir → arriba elige “Guardar como PDF” → toca el botón PDF.</li>
-        <li><b>iPhone:</b> toca Imprimir → pellizca la vista previa hacia afuera (o toca el botón Compartir) → “Guardar en Archivos” o mándalo por WhatsApp.</li>
+        <li><b>iPhone:</b> toca Imprimir. <b>Si no se abre nada</b>, toca el botón <b>Compartir de Safari</b> (el cuadro con flecha ↑, abajo) → <b>Imprimir</b>. En la vista previa toca otra vez <b>Compartir</b> (arriba) → “Guardar en Archivos” o mándalo por WhatsApp.</li>
         <li><b>Computadora:</b> Imprimir → en Destino elige “Guardar como PDF”. En “Más ajustes” puedes quitar los encabezados y pies de página del navegador.</li>
       </ul>
       <p class="ayuda">¿Abriste esta página desde WhatsApp o Facebook? Ábrela en Chrome o Safari para poder imprimir.</p>
@@ -579,7 +580,7 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
     formasPago: "Efectivo, transferencia y tarjeta de débito o crédito.",
     leyendaRecibo: "Este recibo no es un comprobante fiscal.",
     folios: { RX: 1, PRE: 1, REC: 1, CON: 1, JUS: 1 },
-    formularioCobrosUrl: "https://forms.gle/ztcGdPUP9vcDruvY8",
+    formularioCobrosUrl: "",
 
     // Lo siguiente también se edita en Configuración
     logo: "",
@@ -1606,6 +1607,7 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
     w.href = D.whats ? ligaWhats(TEXTO[tipo](st), S.pac.telefono) : '#';
     w.setAttribute('aria-label', telefono10(S.pac.telefono).length === 10 ? 'Mandar por WhatsApp al paciente' : 'Mandar por WhatsApp (eliges el contacto)');
     $('#ejemplo-aviso').hidden = !S.ejemplo[tipo];
+    avisoNavegador();
     const reg = tipo === 'recibo' && esUrl(cfg.formularioCobrosUrl);
     $('#registro-cobro').hidden = !reg;
     $('#btn-registro').href = reg ? cfg.formularioCobrosUrl.trim() : '#';
@@ -1658,14 +1660,41 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
   function imprimir() {
     const tipo = actual.tipo;
     if (actual.p !== 'vista' || !tipo) return;
-    const nuevo = asignarFolio(tipo);
-    pintarHoja(tipo);
-    const folio = folioTexto(tipo, estado(tipo));
-    // Nombre sugerido del PDF (sin datos del paciente)
-    document.title = `${folio ? folio + ' ' : ''}${DOCS[tipo].corto} - ${limpia(cfg.clinica)}`;
+    // Nombre sugerido del PDF (sin datos del paciente). El folio se asigna en "beforeprint",
+    // o sea solo cuando el diálogo de impresión de verdad se abre.
+    const folioProx = DOCS[tipo].folio && !S.ejemplo[tipo] && estado(tipo).folio == null
+      ? `${DOCS[tipo].folio}-${String(cfg.folios[DOCS[tipo].folio]).padStart(4, '0')}` : folioTexto(tipo, estado(tipo));
+    document.title = `${folioProx ? folioProx + ' ' : ''}${DOCS[tipo].corto} - ${limpia(cfg.clinica)}`;
     if (typeof window.print !== 'function') { toast('Este navegador no deja imprimir. Ábrelo en Chrome o Safari.', 'error'); return; }
+    if (!('onbeforeprint' in window) && asignarFolio(tipo)) pintarHoja(tipo); // navegadores viejos
     window.print();
-    if (nuevo) toast(`Folio ${folio} registrado. El siguiente será ${DOCS[tipo].folio}-${String(cfg.folios[DOCS[tipo].folio]).padStart(4, '0')}.`);
+    // En iPhone el diálogo a veces no se abre (Chrome, WhatsApp, acceso directo): se muestra el camino manual
+    if (ENTORNO.ios) {
+      $('#ayuda-pdf').hidden = false;
+      $$('.acc-ayuda').forEach(x => x.setAttribute('aria-expanded', 'true'));
+    }
+  }
+
+  /* ---------- ¿Dónde se abrió la página? (para avisar cuando no se puede imprimir) ---------- */
+  const ENTORNO = (() => {
+    const ua = navigator.userAgent || '';
+    const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const app = (/FBAN|FBAV|FB_IAB|Instagram|WhatsApp|Line\/|MicroMessenger|TikTok|musical_ly|Bytedance|GSA\//i.exec(ua) || [''])[0];
+    let directo = false;
+    try { directo = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches; } catch (e) { /* sin soporte */ }
+    const nombreApp = /FB/i.test(app) ? 'Facebook' : /Instagram/i.test(app) ? 'Instagram' : /WhatsApp/i.test(app) ? 'WhatsApp'
+      : /TikTok|musical|Bytedance/i.test(app) ? 'TikTok' : /GSA/i.test(app) ? 'la app de Google' : app ? 'otra app' : '';
+    return { ios, nombreApp, directo, chromeIOS: ios && /CriOS/.test(ua) };
+  })();
+  function avisoNavegador() {
+    const nav = ENTORNO.ios ? 'Safari' : 'Chrome';
+    let t = '';
+    if (ENTORNO.nombreApp) t = `<p><b>Estás viendo esto dentro de ${ENTORNO.nombreApp}</b>, y desde ahí no se puede imprimir ni guardar el PDF.</p><p style="margin:0">Toca el menú (<b>···</b> o <b>⋮</b>) y elige <b>“Abrir en ${nav}”</b>.</p>`;
+    else if (ENTORNO.directo) t = `<p><b>Abriste el generador desde un acceso directo</b>, y así el iPhone no deja imprimir.</p><p style="margin:0">Para imprimir o guardar el PDF, abre la liga en <b>${nav}</b>.</p>`;
+    else if (ENTORNO.chromeIOS) t = '<p style="margin:0"><b>En iPhone funciona mejor en Safari.</b> Si al tocar Imprimir no pasa nada, abre esta liga en Safari, o usa Compartir → Imprimir de Chrome.</p>';
+    const caja = $('#aviso-navegador');
+    caja.innerHTML = t;
+    caja.hidden = !t;
   }
 
   function ocultarAyuda() {
@@ -2277,8 +2306,19 @@ input[type="date"].control,input[type="time"].control{-webkit-appearance:none;ap
   });
 
   // Ctrl+P / Cmd+P desde la vista previa también cuenta como impresión
+  // También cubre Compartir → Imprimir de Safari. El folio se registra solo si de verdad se imprime.
+  let folioRecien = null;
   window.addEventListener('beforeprint', () => {
-    if (actual.p === 'vista' && asignarFolio(actual.tipo)) pintarHoja(actual.tipo);
+    if (actual.p === 'vista' && asignarFolio(actual.tipo)) {
+      pintarHoja(actual.tipo);
+      folioRecien = actual.tipo;
+    }
+  });
+  window.addEventListener('afterprint', () => {
+    if (!folioRecien) return;
+    const t = folioRecien, pref = DOCS[t].folio;
+    folioRecien = null;
+    toast(`Folio ${folioTexto(t, estado(t))} registrado. El siguiente será ${pref}-${String(cfg.folios[pref]).padStart(4, '0')}.`);
   });
   // Que la barra de acciones nunca tape el final de la página
   const ajustarRelleno = () => { document.body.style.paddingBottom = actual.p === 'vista' ? `${$('#acciones').offsetHeight + 16}px` : ''; };
